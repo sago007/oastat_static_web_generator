@@ -3,6 +3,7 @@
 #include <cppdb/frontend.h>
 #include "command_arguments.hpp"
 #include <fstream>
+#include <ctemplate/template.h>
 
 #ifndef VERSIONNUMBER
 #define VERSIONNUMBER "0.1.0"
@@ -12,6 +13,16 @@ CommandArguments cmdargs;
 
 const char* const SAGO_CONNECTION_STRING = "SAGO_CONNECTION_STRING";
 
+std::string timestamp_now_as_string(cppdb::session& database) {
+	cppdb::statement st = database.prepare("SELECT now()");
+	cppdb::result res = st.query();
+	if(res.next()) {
+		std::string value;
+		res >> value;
+		return value;
+	}
+	return "";
+}
 
 static void create_dir_recursive(const std::string& path) {
 	std::string command = std::string("mkdir -p \"")+path+"\"";
@@ -31,16 +42,21 @@ static void copy_static_files(const std::string& source, const std::string& dest
 
 
 void write_html_index(cppdb::session& database) {
+	ctemplate::TemplateDictionary index_tpl("templates/index.tpl");
+	index_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
+	std::string output;
+	ctemplate::ExpandTemplate("templates/index.tpl", ctemplate::DO_NOT_STRIP, &index_tpl, &output);
 	std::ofstream myfile;
 	myfile.open (cmdargs.output_dir+"/index.html");
-	myfile << "<html>\n";
-	myfile << "</html>\n";
+	myfile << output;
 	myfile.close();
 }
 
 void write_files(cppdb::session& database) {
 	write_html_index(database);
 }
+
+
 
 
 void do_dbtest(cppdb::session& database) {
