@@ -1,0 +1,12 @@
+CMakeCache.txt  
+CMakeFiles
+*~
+*.bak
+*.exe
+*.so
+*.dll
+*.cmake
+Makefile
+oastat_static_web_generator
+output/
+nbproject/
