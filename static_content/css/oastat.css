@@ -22,7 +22,7 @@ font-style: normal;			/* normal | italic | oblique | inherit */
 font-variant: normal;		/* normal | small-caps */
 font-weight: normal;		/* normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | inherit */
 font-size: 10pt;			/* <absolute-size> | <relative-size> | <length> | <percentage> | inherit */
-text-indent: 0px;			/* justificación de la primera línea de un párrafo */ 
+text-indent: 0px;			/* justificación de la primera línea de un párrafo */
 text-align: left;			/* left | right | center | justify | inherit */
 text-decoration: none;		/* none | [ underline || overline || line-through || blink ] | inherit */
 text-transform: none;		/* capitalize | uppercase | lowercase | none | inherit */
@@ -106,7 +106,7 @@ font-size: 20pt;
 .update {
 float: right;
 color: #FFFFFF;
-margin-right: 70px; 
+margin-right: 70px;
 padding-top: 10px;
 font-family: Verdana, Tahoma, Arial, sans-serif;
 font-size: 9pt;
@@ -117,7 +117,7 @@ font-style: italic;
 .endnote {
 float: right;
 color: #000000;
-margin-right: 10px; 
+margin-right: 10px;
 padding-top: 0px;
 padding-bottom: 15px;
 font-family: Verdana, Tahoma, Arial, sans-serif;
@@ -321,7 +321,7 @@ font-weight: bold;
 text-align: center;
 }
 
-.jugador {
+.jugador0 {
 background: #CCCCff;
 color: #000000;
 margin-top: 1px;
@@ -337,7 +337,7 @@ font-size: 8pt;
 text-align: left;
 }
 
-.jugador2 {
+.jugador1 {
 background: #eeeeff;
 color: #000000;
 margin-top: 1px;
@@ -353,7 +353,7 @@ font-size: 8pt;
 text-align: left;
 }
 
-.dato {
+.dato0 {
 background: #CCCCff;
 color: #000000;
 margin-top: 1px;
@@ -369,7 +369,7 @@ font-size: 8pt;
 text-align: center;
 }
 
-.dato2 {
+.dato1 {
 background: #eeeeff;
 color: #000000;
 margin-top: 1px;
@@ -386,13 +386,13 @@ text-align: center;
 }
 
 
-div.centered 
+div.centered
 {
 text-align: center;
 }
-div.centered table 
+div.centered table
 {
-margin: 0 auto; 
+margin: 0 auto;
 text-align: left;
 }
 
@@ -443,4 +443,3 @@ font-family: Verdana, Tahoma, Arial, sans-serif;
 font-size: 8pt;
 color: #FFA500;
 }
-

@@ -4,6 +4,10 @@
 #include "command_arguments.hpp"
 #include <fstream>
 #include <ctemplate/template.h>
+#include <vector>
+#include <map>
+#include <sstream>
+#include <iomanip> 
 
 #ifndef VERSIONNUMBER
 #define VERSIONNUMBER "0.1.0"
@@ -40,10 +44,75 @@ static void copy_static_files(const std::string& source, const std::string& dest
 	}
 }
 
+std::string ZeroPadNumber(int num, int size = 2)
+{
+	std::ostringstream ss;
+	ss.clear();
+	ss << std::setw( size ) << std::setfill( '0' ) << num;
+	return ss.str();
+}
+
+std::string getTimeStamp(const tm& _datetime)
+{
+	std::string s = ZeroPadNumber(_datetime.tm_year+1900,4) + "-" + ZeroPadNumber(_datetime.tm_mon+1) + "-"
+		+ ZeroPadNumber(_datetime.tm_mday) + " " + ZeroPadNumber(_datetime.tm_hour) + ":"
+		+ ZeroPadNumber(_datetime.tm_min) + ":" + ZeroPadNumber(_datetime.tm_sec);
+	return s;
+}
+
+std::vector<int> get_top_killers(cppdb::session& database, int count) {
+	std::vector<int> ret;
+	std::string sql = "select p.playerid, count(0) c from oastat.oastat_players p, oastat.oastat_kills k where p.playerid = k.attacker and k.attacker <> k.target and p.playerid <> 0 group by p.playerid order by c desc limit ?";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, count);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		int value;
+		res >> value;
+		ret.push_back(value);
+	}
+	return ret;
+}
+
+
+struct OastatPlayer {
+	int playerid = 0;
+	std::string nickname;
+	tm lastseen;
+	std::string isBot = "n";
+	std::string model;
+	std::string headmodel;
+};
+
+static std::map<int, OastatPlayer> players;
+
+OastatPlayer getPlayer(cppdb::session& database, int playerid) {
+	OastatPlayer ret;
+	if (players.count(playerid)) {
+		ret = players[playerid];
+	}
+	cppdb::statement st = database.prepare("select playerid, lastseen, isbot, model, headmodel, nickname from oastat.oastat_players where playerid = ?");
+	st.bind(1, playerid);
+	cppdb::result res = st.query();
+	if (res.next()) {
+		res >> ret.playerid >> ret.lastseen >> ret.isBot >> ret.model >> ret.headmodel >> ret.nickname;
+		players[playerid] = ret;
+	}
+	return ret;
+}
 
 void write_html_index(cppdb::session& database) {
 	ctemplate::TemplateDictionary index_tpl("templates/index.tpl");
 	index_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
+	std::vector<int> player_list = get_top_killers(database, 25);
+	for (int i = 0; i < player_list.size(); ++i) {
+		OastatPlayer p = getPlayer(database, player_list.at(i));
+		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("PLAYER_LIST");
+		sub_dict->SetValue("EVEN_LINE", (i%2)?"1":"0");
+		sub_dict->SetValue("PLAYER_NAME", p.nickname);
+		sub_dict->SetValue("PLAYER_LAST_SEEN", getTimeStamp(p.lastseen));
+		sub_dict->SetValue("PLAYER_IS_BOT", p.isBot);
+	}
 	std::string output;
 	ctemplate::ExpandTemplate("templates/index.tpl", ctemplate::DO_NOT_STRIP, &index_tpl, &output);
 	std::ofstream myfile;
