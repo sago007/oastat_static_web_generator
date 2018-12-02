@@ -19,13 +19,17 @@
 
 <TABLE class="tabladatos">
 	<TR>
-		<TH><DIV class="tituloup"></DIV></TH>
+		<TH><DIV class="tituloup">Name</DIV></TH>
+		<TH><DIV class="tituloup">Kills</DIV></TH>
+		<TH><DIV class="tituloup">Deaths</DIV></TH>
 		<TH><DIV class="tituloup">Last seen</DIV></TH>
 		<TH><DIV class="tituloup">Is bot</DIV></TH>
 	</TR>
 	{{#PLAYER_LIST}}
 	<tr>
 	<td><div class="jugador{{EVEN_LINE}}">{{PLAYER_NAME}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_KILLS}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_DEATHS}}</div></td>
 	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_LAST_SEEN}}</div></td>
 	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_IS_BOT}}</div></td>
 	<tr>

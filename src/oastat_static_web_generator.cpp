@@ -60,6 +60,23 @@ std::string getTimeStamp(const tm& _datetime)
 	return s;
 }
 
+static std::map<int, int> kills_by_player;
+static std::map<int, int> player_deaths;
+
+void populate_player_deaths(cppdb::session& database, const std::vector<int>& player_ids) {
+	std::string sql = "select count(0) from oastat.oastat_kills k where k.attacker <> k.target and target = ?";
+	cppdb::statement st = database.prepare(sql);
+	for (int player_id : player_ids) {
+		st.bind(1, player_id);
+		int deaths;
+		cppdb::result res = st.query();
+		if (res.next()) {
+			res >> deaths;
+			player_deaths[player_id] = deaths;
+		}
+	}
+}
+
 std::vector<int> get_top_killers(cppdb::session& database, int count) {
 	std::vector<int> ret;
 	std::string sql = "select p.playerid, count(0) c from oastat.oastat_players p, oastat.oastat_kills k where p.playerid = k.attacker and k.attacker <> k.target and p.playerid <> 0 group by p.playerid order by c desc limit ?";
@@ -67,9 +84,11 @@ std::vector<int> get_top_killers(cppdb::session& database, int count) {
 	st.bind(1, count);
 	cppdb::result res = st.query();
 	while(res.next()) {
-		int value;
-		res >> value;
-		ret.push_back(value);
+		int player_id;
+		int kills;
+		res >> player_id >> kills;
+		kills_by_player[player_id] = kills;
+		ret.push_back(player_id);
 	}
 	return ret;
 }
@@ -105,12 +124,15 @@ void write_html_index(cppdb::session& database) {
 	ctemplate::TemplateDictionary index_tpl("templates/index.tpl");
 	index_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
 	std::vector<int> player_list = get_top_killers(database, 25);
+	populate_player_deaths(database, player_list);
 	for (int i = 0; i < player_list.size(); ++i) {
 		OastatPlayer p = getPlayer(database, player_list.at(i));
 		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("PLAYER_LIST");
 		sub_dict->SetValue("EVEN_LINE", (i%2)?"1":"0");
 		sub_dict->SetValue("PLAYER_NAME", p.nickname);
 		sub_dict->SetValue("PLAYER_LAST_SEEN", getTimeStamp(p.lastseen));
+		sub_dict->SetValue("PLAYER_KILLS", std::to_string(kills_by_player[p.playerid]));
+		sub_dict->SetValue("PLAYER_DEATHS", std::to_string(player_deaths[p.playerid]));
 		sub_dict->SetValue("PLAYER_IS_BOT", p.isBot);
 	}
 	std::string output;
