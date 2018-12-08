@@ -17,6 +17,14 @@ CommandArguments cmdargs;
 
 const char* const SAGO_CONNECTION_STRING = "SAGO_CONNECTION_STRING";
 
+
+#define AWARD_IMPRESSIVE 2
+#define AWARD_EXCELLENT 1
+#define AWARD_GAUNTLET 0
+#define AWARD_DEFENCE 3
+#define AWARD_CAPTURE 4
+#define AWARD_ASSIST 5
+
 std::string timestamp_now_as_string(cppdb::session& database) {
 	cppdb::statement st = database.prepare("SELECT now()");
 	cppdb::result res = st.query();
@@ -62,6 +70,7 @@ std::string getTimeStamp(const tm& _datetime)
 
 static std::map<int, int> kills_by_player;
 static std::map<int, int> player_deaths;
+static std::map<int, std::map<int, int>> player_awards;
 
 void populate_player_deaths(cppdb::session& database, const std::vector<int>& player_ids) {
 	std::string sql = "select count(0) from oastat.oastat_kills k where k.attacker <> k.target and target = ?";
@@ -73,6 +82,21 @@ void populate_player_deaths(cppdb::session& database, const std::vector<int>& pl
 		if (res.next()) {
 			res >> deaths;
 			player_deaths[player_id] = deaths;
+		}
+	}
+}
+
+void populate_player_awards(cppdb::session& database, const std::vector<int>& player_ids) {
+	std::string sql = "select award, count(0) c from oastat.oastat_awards where player = ? group by  player, award";
+	cppdb::statement st = database.prepare(sql);
+	for (int player_id : player_ids) {
+		st.bind(1, player_id);
+		int award;
+		int count;
+		cppdb::result res = st.query();
+		while (res.next()) {
+			res >> award >> count;
+			player_awards[player_id][award] = count;
 		}
 	}
 }
@@ -92,7 +116,6 @@ std::vector<int> get_top_killers(cppdb::session& database, int count) {
 	}
 	return ret;
 }
-
 
 struct OastatPlayer {
 	int playerid = 0;
@@ -125,6 +148,7 @@ void write_html_index(cppdb::session& database) {
 	index_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
 	std::vector<int> player_list = get_top_killers(database, 25);
 	populate_player_deaths(database, player_list);
+	populate_player_awards(database, player_list);
 	for (int i = 0; i < player_list.size(); ++i) {
 		OastatPlayer p = getPlayer(database, player_list.at(i));
 		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("PLAYER_LIST");
@@ -134,6 +158,12 @@ void write_html_index(cppdb::session& database) {
 		sub_dict->SetValue("PLAYER_KILLS", std::to_string(kills_by_player[p.playerid]));
 		sub_dict->SetValue("PLAYER_DEATHS", std::to_string(player_deaths[p.playerid]));
 		sub_dict->SetValue("PLAYER_IS_BOT", p.isBot);
+		sub_dict->SetValue("AWARD_GAUNTLET", std::to_string(player_awards[p.playerid][AWARD_GAUNTLET]));
+		sub_dict->SetValue("AWARD_IMPRESSIVE", std::to_string(player_awards[p.playerid][AWARD_IMPRESSIVE]));
+		sub_dict->SetValue("AWARD_EXCELLENT", std::to_string(player_awards[p.playerid][AWARD_EXCELLENT]));
+		sub_dict->SetValue("AWARD_CAPTURE", std::to_string(player_awards[p.playerid][AWARD_CAPTURE]));
+		sub_dict->SetValue("AWARD_DEFENCE", std::to_string(player_awards[p.playerid][AWARD_DEFENCE]));
+		sub_dict->SetValue("AWARD_ASSIST", std::to_string(player_awards[p.playerid][AWARD_ASSIST]));
 	}
 	std::string output;
 	ctemplate::ExpandTemplate("templates/index.tpl", ctemplate::DO_NOT_STRIP, &index_tpl, &output);

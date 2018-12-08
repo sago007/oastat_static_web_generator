@@ -24,6 +24,12 @@
 		<TH><DIV class="tituloup">Deaths</DIV></TH>
 		<TH><DIV class="tituloup">Last seen</DIV></TH>
 		<TH><DIV class="tituloup">Is bot</DIV></TH>
+        <TH><DIV class="tituloup">Gauntlet</DIV></TH>
+        <TH><DIV class="tituloup">Impressive</DIV></TH>
+        <TH><DIV class="tituloup">Excellent</DIV></TH>
+        <TH><DIV class="tituloup">Capture</DIV></TH>
+        <TH><DIV class="tituloup">Defence</DIV></TH>
+        <TH><DIV class="tituloup">Assist</DIV></TH>
 	</TR>
 	{{#PLAYER_LIST}}
 	<tr>
@@ -32,6 +38,12 @@
 	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_DEATHS}}</div></td>
 	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_LAST_SEEN}}</div></td>
 	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_IS_BOT}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{AWARD_GAUNTLET}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{AWARD_IMPRESSIVE}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{AWARD_EXCELLENT}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{AWARD_CAPTURE}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{AWARD_DEFENCE}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{AWARD_ASSIST}}</div></td>
 	<tr>
 	{{/PLAYER_LIST}}
 </TABLE>
