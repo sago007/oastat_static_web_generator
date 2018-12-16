@@ -198,7 +198,7 @@ void write_html_index(cppdb::session& database) {
 	populate_player_deaths(database, player_list);
 	populate_player_awards(database, player_list);
 	populate_player_kills(database, player_list);
-	for (int i = 0; i < player_list.size(); ++i) {
+	for (size_t i = 0; i < player_list.size(); ++i) {
 		OastatPlayer p = getPlayer(database, player_list.at(i));
 		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("PLAYER_LIST");
 		sub_dict->SetValue("EVEN_LINE", (i%2)?"1":"0");
@@ -214,7 +214,7 @@ void write_html_index(cppdb::session& database) {
 		sub_dict->SetValue("AWARD_DEFENCE", std::to_string(player_awards[p.playerid][AWARD_DEFENCE]));
 		sub_dict->SetValue("AWARD_ASSIST", std::to_string(player_awards[p.playerid][AWARD_ASSIST]));
 	}
-	for (int i = 0; i < player_list.size(); ++i) {
+	for (size_t i = 0; i < player_list.size(); ++i) {
 		OastatPlayer p = getPlayer(database, player_list.at(i));
 		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("PLAYER_WEAPON_LIST");
 		sub_dict->SetValue("EVEN_LINE", (i%2)?"1":"0");
