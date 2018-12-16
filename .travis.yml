@@ -1,0 +1,12 @@
+sudo: required
+
+language: cpp
+
+services:
+  - docker
+
+
+script: docker build . -f extra/docker/Dockerfile.Ubuntu16.04.build -t oastat_static_web_test
+
+notifications:
+  email: false

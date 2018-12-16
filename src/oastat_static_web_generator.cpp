@@ -17,6 +17,38 @@ CommandArguments cmdargs;
 
 const char* const SAGO_CONNECTION_STRING = "SAGO_CONNECTION_STRING";
 
+// means of death
+typedef enum {
+	MOD_UNKNOWN,
+	MOD_SHOTGUN,
+	MOD_GAUNTLET,
+	MOD_MACHINEGUN,
+	MOD_GRENADE,
+	MOD_GRENADE_SPLASH,
+	MOD_ROCKET,
+	MOD_ROCKET_SPLASH,
+	MOD_PLASMA,
+	MOD_PLASMA_SPLASH,
+	MOD_RAILGUN,
+	MOD_LIGHTNING,
+	MOD_BFG,
+	MOD_BFG_SPLASH,
+	MOD_WATER,
+	MOD_SLIME,
+	MOD_LAVA,
+	MOD_CRUSH,
+	MOD_TELEFRAG,
+	MOD_FALLING,
+	MOD_SUICIDE,
+	MOD_TARGET_LASER,
+	MOD_TRIGGER_HURT,
+	MOD_NAIL,
+	MOD_CHAINGUN,
+	MOD_PROXIMITY_MINE,
+	MOD_KAMIKAZE,
+	MOD_JUICED,
+	MOD_GRAPPLE
+} meansOfDeath_t;
 
 #define AWARD_IMPRESSIVE 2
 #define AWARD_EXCELLENT 1
@@ -71,6 +103,7 @@ std::string getTimeStamp(const tm& _datetime)
 static std::map<int, int> kills_by_player;
 static std::map<int, int> player_deaths;
 static std::map<int, std::map<int, int>> player_awards;
+static std::map<int, std::map<int, int>> player_weapon_kills;
 
 void populate_player_deaths(cppdb::session& database, const std::vector<int>& player_ids) {
 	std::string sql = "select count(0) from oastat.oastat_kills k where k.attacker <> k.target and target = ?";
@@ -97,6 +130,21 @@ void populate_player_awards(cppdb::session& database, const std::vector<int>& pl
 		while (res.next()) {
 			res >> award >> count;
 			player_awards[player_id][award] = count;
+		}
+	}
+}
+
+void populate_player_kills(cppdb::session& database, const std::vector<int>& player_ids) {
+	std::string sql = "select modtype, count(0) c from oastat.oastat_kills where attacker <> target and attacker = ? group by modtype";
+	cppdb::statement st = database.prepare(sql);
+	for (int player_id : player_ids) {
+		st.bind(1, player_id);
+		int weapon;
+		int count;
+		cppdb::result res = st.query();
+		while (res.next()) {
+			res >> weapon >> count;
+			player_weapon_kills[player_id][weapon] = count;
 		}
 	}
 }
@@ -149,6 +197,7 @@ void write_html_index(cppdb::session& database) {
 	std::vector<int> player_list = get_top_killers(database, 25);
 	populate_player_deaths(database, player_list);
 	populate_player_awards(database, player_list);
+	populate_player_kills(database, player_list);
 	for (int i = 0; i < player_list.size(); ++i) {
 		OastatPlayer p = getPlayer(database, player_list.at(i));
 		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("PLAYER_LIST");
@@ -164,6 +213,25 @@ void write_html_index(cppdb::session& database) {
 		sub_dict->SetValue("AWARD_CAPTURE", std::to_string(player_awards[p.playerid][AWARD_CAPTURE]));
 		sub_dict->SetValue("AWARD_DEFENCE", std::to_string(player_awards[p.playerid][AWARD_DEFENCE]));
 		sub_dict->SetValue("AWARD_ASSIST", std::to_string(player_awards[p.playerid][AWARD_ASSIST]));
+	}
+	for (int i = 0; i < player_list.size(); ++i) {
+		OastatPlayer p = getPlayer(database, player_list.at(i));
+		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("PLAYER_WEAPON_LIST");
+		sub_dict->SetValue("EVEN_LINE", (i%2)?"1":"0");
+		sub_dict->SetValue("PLAYER_NAME", p.nickname);
+		sub_dict->SetValue("WEAPON_SHOTGUN", std::to_string(player_weapon_kills[p.playerid][MOD_SHOTGUN]));
+		sub_dict->SetValue("WEAPON_GAUNTLET", std::to_string(player_weapon_kills[p.playerid][MOD_GAUNTLET]));
+		sub_dict->SetValue("WEAPON_MACHINEGUN", std::to_string(player_weapon_kills[p.playerid][MOD_MACHINEGUN]));
+		sub_dict->SetValue("WEAPON_GRENADE", std::to_string(player_weapon_kills[p.playerid][MOD_GRENADE]+player_weapon_kills[p.playerid][MOD_GRENADE_SPLASH]));
+		sub_dict->SetValue("WEAPON_ROCKET", std::to_string(player_weapon_kills[p.playerid][MOD_ROCKET]+player_weapon_kills[p.playerid][MOD_ROCKET_SPLASH]));
+		sub_dict->SetValue("WEAPON_PLASMA", std::to_string(player_weapon_kills[p.playerid][MOD_PLASMA]+player_weapon_kills[p.playerid][MOD_PLASMA_SPLASH]));
+		sub_dict->SetValue("WEAPON_RAILGUN", std::to_string(player_weapon_kills[p.playerid][MOD_RAILGUN]));
+		sub_dict->SetValue("WEAPON_LIGHTNING", std::to_string(player_weapon_kills[p.playerid][MOD_LIGHTNING]));
+		sub_dict->SetValue("WEAPON_NAILGUN", std::to_string(player_weapon_kills[p.playerid][MOD_NAIL]));
+		sub_dict->SetValue("WEAPON_CHAINGUN", std::to_string(player_weapon_kills[p.playerid][MOD_CHAINGUN]));
+		sub_dict->SetValue("WEAPON_BFG", std::to_string(player_weapon_kills[p.playerid][MOD_BFG]+player_weapon_kills[p.playerid][MOD_BFG_SPLASH]));
+		sub_dict->SetValue("WEAPON_TELEFRAG", std::to_string(player_weapon_kills[p.playerid][MOD_TELEFRAG]));
+		sub_dict->SetValue("WEAPON_FALLING", std::to_string(player_weapon_kills[p.playerid][MOD_FALLING]));
 	}
 	std::string output;
 	ctemplate::ExpandTemplate("templates/index.tpl", ctemplate::DO_NOT_STRIP, &index_tpl, &output);
