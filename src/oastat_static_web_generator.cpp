@@ -270,6 +270,9 @@ int main(int argc, const char* argv[]) {
 	boost::program_options::notify(vm);
 	if (vm.count("help")) {
 		std::cout << desc << "\n";
+		std::cout << "\n" << "Connection details are read from the environemtn variable \"" << SAGO_CONNECTION_STRING << "\". ";
+		std::cout << "The string must be in CppDb format. \n";
+		std::cout << "Like: \"export " << SAGO_CONNECTION_STRING << "=mysql:database=oastat;username=openarena\"\n";
 		return 0;
 	}
 	if (vm.count("version")) {
