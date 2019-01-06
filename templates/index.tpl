@@ -48,7 +48,7 @@
 	{{/PLAYER_LIST}}
 </TABLE>
 
-<TABLE class="tabladatos">
+<table class="tabladatos">
 	<TR>
         <TH><DIV class="tituloup">Name</DIV></TH>
         <TH><DIV class="tituloup">Shotgun</DIV></TH>
@@ -83,6 +83,21 @@
 	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_FALLING}}</div></td>
 	<tr>
 	{{/PLAYER_WEAPON_LIST}}
+</table>
+<table class="tabladatos">
+<tr>
+<TH><DIV class="tituloup">Map</DIV></TH>
+<TH><DIV class="tituloup">Times played</DIV></TH>
+<TH><DIV class="tituloup">Last played at</DIV></TH>
+</tr>
+{{#MAP_LIST}}
+<tr>
+    <td><div class="jugador{{EVEN_LINE}}">{{MAP_NAME}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{TIMES_PLAYED}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{LAST_PLAYED}}</div></td>
+</tr>
+{{/MAP_LIST}}
+</table>
 </DIV>
 </DIV>
 </BODY>

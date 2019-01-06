@@ -15,6 +15,8 @@
 
 CommandArguments cmdargs;
 
+const size_t MAX_MAP_LIST = 10;
+
 const char* const SAGO_CONNECTION_STRING = "SAGO_CONNECTION_STRING";
 
 // means of death
@@ -100,10 +102,16 @@ std::string getTimeStamp(const tm& _datetime)
 	return s;
 }
 
+struct MapInfo {
+	int times_played = {};
+	tm last_played = {};
+};
+
 static std::map<int, int> kills_by_player;
 static std::map<int, int> player_deaths;
 static std::map<int, std::map<int, int>> player_awards;
 static std::map<int, std::map<int, int>> player_weapon_kills;
+static std::map<std::string, MapInfo> map_infos;
 
 void populate_player_deaths(cppdb::session& database, const std::vector<int>& player_ids) {
 	std::string sql = "select count(0) from oastat.oastat_kills k where k.attacker <> k.target and target = ?";
@@ -161,6 +169,21 @@ std::vector<int> get_top_killers(cppdb::session& database, int count) {
 		res >> player_id >> kills;
 		kills_by_player[player_id] = kills;
 		ret.push_back(player_id);
+	}
+	return ret;
+}
+
+std::vector<std::string> get_most_played_maps(cppdb::session& database) {
+	std::vector<std::string> ret;
+	std::string sql = "select mapname, count(0) c, max(time) last_game from oastat.oastat_games group by mapname order by c desc";
+	cppdb::statement st = database.prepare(sql);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		std::string mapname;
+		MapInfo info;
+		res >> mapname >> info.times_played >> info.last_played;
+		map_infos[mapname] = info;
+		ret.push_back(mapname);
 	}
 	return ret;
 }
@@ -232,6 +255,16 @@ void write_html_index(cppdb::session& database) {
 		sub_dict->SetValue("WEAPON_BFG", std::to_string(player_weapon_kills[p.playerid][MOD_BFG]+player_weapon_kills[p.playerid][MOD_BFG_SPLASH]));
 		sub_dict->SetValue("WEAPON_TELEFRAG", std::to_string(player_weapon_kills[p.playerid][MOD_TELEFRAG]));
 		sub_dict->SetValue("WEAPON_FALLING", std::to_string(player_weapon_kills[p.playerid][MOD_FALLING]));
+	}
+	std::vector<std::string> map_list = get_most_played_maps(database);
+	for (size_t i = 0; i < map_list.size() && i < MAX_MAP_LIST; ++i) {
+		const std::string& mapname = map_list[i];
+		const MapInfo& info = map_infos[mapname];
+		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("MAP_LIST");
+		sub_dict->SetValue("EVEN_LINE", (i%2)?"1":"0");
+		sub_dict->SetValue("MAP_NAME", mapname);
+		sub_dict->SetValue("TIMES_PLAYED", std::to_string(info.times_played));
+		sub_dict->SetValue("LAST_PLAYED", getTimeStamp(info.last_played));
 	}
 	std::string output;
 	ctemplate::ExpandTemplate("templates/index.tpl", ctemplate::DO_NOT_STRIP, &index_tpl, &output);
