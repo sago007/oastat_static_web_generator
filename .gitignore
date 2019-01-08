@@ -10,3 +10,4 @@ Makefile
 oastat_static_web_generator
 output/
 nbproject/
+.vscode
