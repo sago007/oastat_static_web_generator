@@ -19,6 +19,8 @@ const size_t MAX_MAP_LIST = 10;
 
 const char* const SAGO_CONNECTION_STRING = "SAGO_CONNECTION_STRING";
 
+void write_html_game(cppdb::session& database, int game_number);
+
 // means of death
 typedef enum {
 	MOD_UNKNOWN,
@@ -214,6 +216,18 @@ OastatPlayer getPlayer(cppdb::session& database, int playerid) {
 	return ret;
 }
 
+void write_html_game(cppdb::session& database, int game_number) {
+	ctemplate::TemplateDictionary game_tpl("templates/game.tpl");
+	game_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
+	game_tpl.SetValue("GAME_NUMBER", std::to_string(game_number));
+	std::string output;
+	ctemplate::ExpandTemplate("templates/game.tpl", ctemplate::DO_NOT_STRIP, &game_tpl, &output);
+	std::ofstream myfile;
+	myfile.open (cmdargs.output_dir+"/game/"+std::to_string(game_number)+".html");
+	myfile << output;
+	myfile.close();
+}
+
 void write_html_index(cppdb::session& database) {
 	ctemplate::TemplateDictionary index_tpl("templates/index.tpl");
 	index_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
@@ -276,6 +290,7 @@ void write_html_index(cppdb::session& database) {
 
 void write_files(cppdb::session& database) {
 	write_html_index(database);
+	write_html_game(database, 1);
 }
 
 
@@ -322,6 +337,7 @@ int main(int argc, const char* argv[]) {
 	cppdb::session database(cmdargs.connectstring);
 	do_dbtest(database);
 	create_dir_recursive(cmdargs.output_dir+"/static");
+	create_dir_recursive(cmdargs.output_dir+"/game");
 	copy_static_files("static_content", cmdargs.output_dir+"/static");
 	write_files(database);
 	return 0;
