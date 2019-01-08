@@ -92,12 +92,30 @@
 </tr>
 {{#MAP_LIST}}
 <tr>
-    <td><div class="jugador{{EVEN_LINE}}">{{MAP_NAME}}</div></td>
+    <td><div class="dato{{EVEN_LINE}}">{{MAP_NAME}}</div></td>
 	<td><div class="dato{{EVEN_LINE}}">{{TIMES_PLAYED}}</div></td>
 	<td><div class="dato{{EVEN_LINE}}">{{LAST_PLAYED}}</div></td>
 </tr>
 {{/MAP_LIST}}
 </table>
+
+<table class="tabladatos">
+<tr>
+<TH><DIV class="tituloup">Game</DIV></TH>
+<TH><DIV class="tituloup">Map</DIV></TH>
+<TH><DIV class="tituloup">Played at</DIV></TH>
+<TH><DIV class="tituloup">Server name</DIV></TH>
+</tr>
+{{#RECENT_GAMES}}
+<tr>
+    <td><div class="dato{{EVEN_LINE}}"><a class="dato{{EVEN_LINE}}" href="game/{{GAMENUMBER}}.html">{{GAMENUMBER}}</a></div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{MAPNAME}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{TIME}}</div></td>
+	<td><div class="dato{{EVEN_LINE}}">{{SERVERNAME}}</div></td>
+</tr>
+{{/RECENT_GAMES}}
+</table>
+
 </DIV>
 </DIV>
 </BODY>

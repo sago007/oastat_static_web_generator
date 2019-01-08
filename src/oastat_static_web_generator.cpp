@@ -216,6 +216,28 @@ OastatPlayer getPlayer(cppdb::session& database, int playerid) {
 	return ret;
 }
 
+struct OastatGame {
+	int gamenumber = 0;
+	int gametype = 0;
+	std::string mapname;
+	tm time = {};
+	std::string basegame;
+	int second = 0;
+	std::string servername;
+};
+
+void getRecentGames(cppdb::session& database, std::vector<OastatGame>& games) {
+	std::string sql = "select gamenumber, gametype, mapname, time, basegame, second, servername from oastat.oastat_games order by gamenumber desc limit 10";
+	cppdb::statement st = database.prepare(sql);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		OastatGame game;
+		res >> game.gamenumber >> game.gametype >> game.mapname >> game.time >> game.basegame >> game.second >> game.servername;
+		write_html_game(database, game.gamenumber);
+		games.push_back(game);
+	}
+}
+
 void write_html_game(cppdb::session& database, int game_number) {
 	ctemplate::TemplateDictionary game_tpl("templates/game.tpl");
 	game_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
@@ -235,6 +257,8 @@ void write_html_index(cppdb::session& database) {
 	populate_player_deaths(database, player_list);
 	populate_player_awards(database, player_list);
 	populate_player_kills(database, player_list);
+	std::vector<OastatGame> games;
+	getRecentGames(database, games);
 	for (size_t i = 0; i < player_list.size(); ++i) {
 		OastatPlayer p = getPlayer(database, player_list.at(i));
 		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("PLAYER_LIST");
@@ -279,6 +303,15 @@ void write_html_index(cppdb::session& database) {
 		sub_dict->SetValue("MAP_NAME", mapname);
 		sub_dict->SetValue("TIMES_PLAYED", std::to_string(info.times_played));
 		sub_dict->SetValue("LAST_PLAYED", getTimeStamp(info.last_played));
+	}
+	for (size_t i = 0; i < games.size(); ++i) {
+		const OastatGame& game = games[i];
+		ctemplate::TemplateDictionary* sub_dict = index_tpl.AddSectionDictionary("RECENT_GAMES");
+		sub_dict->SetValue("EVEN_LINE", (i%2)?"1":"0");
+		sub_dict->SetValue("GAMENUMBER", std::to_string(game.gamenumber) );
+		sub_dict->SetValue("MAPNAME", game.mapname);
+		sub_dict->SetValue("TIME", getTimeStamp(game.time));
+		sub_dict->SetValue("SERVERNAME", game.servername);
 	}
 	std::string output;
 	ctemplate::ExpandTemplate("templates/index.tpl", ctemplate::DO_NOT_STRIP, &index_tpl, &output);
