@@ -1,123 +1,118 @@
 {{%AUTOESCAPE context="HTML"}}
 
 <html>
-<HEAD>
-<META http-equiv="Content-Type" content="text/html; charset=utf-8">
-<META http-equiv="Content-Language" content="en">
-<META name="description" content="OpenArena stats by oastats">
-<LINK rel="stylesheet" href="static/css/oastat.css" type="text/css">
-<TITLE>OpenArena Stats</TITLE>
-</HEAD>
-<BODY>
-<DIV id="marco">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="Content-Language" content="en">
+		<meta name="description" content="OpenArena stats by oastats">
+		<link rel="stylesheet" href="static/css/oastat.css" type="text/css">
+		<title>OpenArena Stats</title>
+	</head>
 
+	<body>
+		<h1>OpenArena Stats</h1>
 
-<DIV class="cuadropresentacion">
-<DIV class="update">Last updated on {{GENERATION_DATE}}</DIV>
-<DIV class="intro">OpenArena Stats</DIV>
+		<table>
+			<tr>
+				<th>Name</th>
+				<th>Kills</th>
+				<th>Deaths</th>
+				<th>Last seen</th>
+				<th>Is bot</th>
+				<th>Gauntlet</th>
+				<th>Impressive</th>
+				<th>Excellent</th>
+				<th>Capture</th>
+				<th>Defence</th>
+				<th>Assist</th>
+			</tr>
+			{{#PLAYER_LIST}}
+			<tr>
+				<td>{{PLAYER_NAME}}</td>
+				<td>{{PLAYER_KILLS}}</td>
+				<td>{{PLAYER_DEATHS}}</td>
+				<td>{{PLAYER_LAST_SEEN}}</td>
+				<td>{{PLAYER_IS_BOT}}</td>
+				<td>{{AWARD_GAUNTLET}}</td>
+				<td>{{AWARD_IMPRESSIVE}}</td>
+				<td>{{AWARD_EXCELLENT}}</td>
+				<td>{{AWARD_CAPTURE}}</td>
+				<td>{{AWARD_DEFENCE}}</td>
+				<td>{{AWARD_ASSIST}}</td>
+			</tr>
+			{{/PLAYER_LIST}}
+		</table>
 
+		<table>
+			<tr>
+				<th>Name</th>
+				<th>Shotgun</th>
+				<th>Gauntlet</th>
+				<th>Machinegun</th>
+				<th>Grenade</th>
+				<th>Rocket</th>
+				<th>Plasma</th>
+				<th>Railgun</th>
+				<th>Lightning</th>
+				<th>Nailgun</th>
+				<th>Chaingun</th>
+				<th>BFG</th>
+				<th>Telefrag</th>
+				<th>Falling</th>
+			</tr>
+			{{#PLAYER_WEAPON_LIST}}
+			<tr>
+				<td>{{PLAYER_NAME}}</td>
+				<td>{{WEAPON_SHOTGUN}}</td>
+				<td>{{WEAPON_GAUNTLET}}</td>
+				<td>{{WEAPON_MACHINEGUN}}</td>
+				<td>{{WEAPON_GRENADE}}</td>
+				<td>{{WEAPON_ROCKET}}</td>
+				<td>{{WEAPON_PLASMA}}</td>
+				<td>{{WEAPON_RAILGUN}}</td>
+				<td>{{WEAPON_LIGHTNING}}</td>
+				<td>{{WEAPON_NAILGUN}}</td>
+				<td>{{WEAPON_CHAINGUN}}</td>
+				<td>{{WEAPON_BFG}}</td>
+				<td>{{WEAPON_TELEFRAG}}</td>
+				<td>{{WEAPON_FALLING}}</td>
+			</tr>
+			{{/PLAYER_WEAPON_LIST}}
+		</table>
 
-<TABLE class="tabladatos">
-	<TR>
-		<TH><DIV class="tituloup">Name</DIV></TH>
-		<TH><DIV class="tituloup">Kills</DIV></TH>
-		<TH><DIV class="tituloup">Deaths</DIV></TH>
-		<TH><DIV class="tituloup">Last seen</DIV></TH>
-		<TH><DIV class="tituloup">Is bot</DIV></TH>
-        <TH><DIV class="tituloup">Gauntlet</DIV></TH>
-        <TH><DIV class="tituloup">Impressive</DIV></TH>
-        <TH><DIV class="tituloup">Excellent</DIV></TH>
-        <TH><DIV class="tituloup">Capture</DIV></TH>
-        <TH><DIV class="tituloup">Defence</DIV></TH>
-        <TH><DIV class="tituloup">Assist</DIV></TH>
-	</TR>
-	{{#PLAYER_LIST}}
-	<tr>
-	<td><div class="jugador{{EVEN_LINE}}">{{PLAYER_NAME}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_KILLS}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_DEATHS}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_LAST_SEEN}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{PLAYER_IS_BOT}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{AWARD_GAUNTLET}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{AWARD_IMPRESSIVE}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{AWARD_EXCELLENT}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{AWARD_CAPTURE}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{AWARD_DEFENCE}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{AWARD_ASSIST}}</div></td>
-	<tr>
-	{{/PLAYER_LIST}}
-</TABLE>
+		<table>
+			<tr>
+				<th>Map</th>
+				<th>Times played</th>
+				<th>Last played at</th>
+			</tr>
+			{{#MAP_LIST}}
+			<tr>
+				<td>{{MAP_NAME}}</td>
+				<td>{{TIMES_PLAYED}}</td>
+				<td>{{LAST_PLAYED}}</td>
+			</tr>
+			{{/MAP_LIST}}
+		</table>
 
-<table class="tabladatos">
-	<TR>
-        <TH><DIV class="tituloup">Name</DIV></TH>
-        <TH><DIV class="tituloup">Shotgun</DIV></TH>
-        <TH><DIV class="tituloup">Gauntlet</DIV></TH>
-        <TH><DIV class="tituloup">Machinegun</DIV></TH>
-        <TH><DIV class="tituloup">Grenade</DIV></TH>
-        <TH><DIV class="tituloup">Rocket</DIV></TH>
-        <TH><DIV class="tituloup">Plasma</DIV></TH>
-        <TH><DIV class="tituloup">Railgun</DIV></TH>
-        <TH><DIV class="tituloup">Lightning</DIV></TH>
-        <TH><DIV class="tituloup">Nailgun</DIV></TH>
-        <TH><DIV class="tituloup">Chaingun</DIV></TH>
-        <TH><DIV class="tituloup">BFG</DIV></TH>
-        <TH><DIV class="tituloup">Telefrag</DIV></TH>
-        <TH><DIV class="tituloup">Falling</DIV></TH>
-	</TR>
-    {{#PLAYER_WEAPON_LIST}}
-	<tr>
-	<td><div class="jugador{{EVEN_LINE}}">{{PLAYER_NAME}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_SHOTGUN}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_GAUNTLET}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_MACHINEGUN}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_GRENADE}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_ROCKET}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_PLASMA}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_RAILGUN}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_LIGHTNING}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_NAILGUN}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_CHAINGUN}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_BFG}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_TELEFRAG}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{WEAPON_FALLING}}</div></td>
-	<tr>
-	{{/PLAYER_WEAPON_LIST}}
-</table>
-<table class="tabladatos">
-<tr>
-<TH><DIV class="tituloup">Map</DIV></TH>
-<TH><DIV class="tituloup">Times played</DIV></TH>
-<TH><DIV class="tituloup">Last played at</DIV></TH>
-</tr>
-{{#MAP_LIST}}
-<tr>
-    <td><div class="dato{{EVEN_LINE}}">{{MAP_NAME}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{TIMES_PLAYED}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{LAST_PLAYED}}</div></td>
-</tr>
-{{/MAP_LIST}}
-</table>
+		<table>
+			<tr>
+				<th>Game</th>
+				<th>Map</th>
+				<th>Played at</th>
+				<th>Server name</th>
+			</tr>
+			{{#RECENT_GAMES}}
+			<tr>
+				<td><a href="game/{{GAMENUMBER}}.html">{{GAMENUMBER}}</a></td>
+				<td>{{MAPNAME}}</td>
+				<td>{{TIME}}</td>
+				<td>{{SERVERNAME}}</td>
+			</tr>
+			{{/RECENT_GAMES}}
+		</table>
 
-<table class="tabladatos">
-<tr>
-<TH><DIV class="tituloup">Game</DIV></TH>
-<TH><DIV class="tituloup">Map</DIV></TH>
-<TH><DIV class="tituloup">Played at</DIV></TH>
-<TH><DIV class="tituloup">Server name</DIV></TH>
-</tr>
-{{#RECENT_GAMES}}
-<tr>
-    <td><div class="dato{{EVEN_LINE}}"><a class="dato{{EVEN_LINE}}" href="game/{{GAMENUMBER}}.html">{{GAMENUMBER}}</a></div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{MAPNAME}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{TIME}}</div></td>
-	<td><div class="dato{{EVEN_LINE}}">{{SERVERNAME}}</div></td>
-</tr>
-{{/RECENT_GAMES}}
-</table>
-
-</DIV>
-</DIV>
-</BODY>
+		<p class="update">Last updated on {{GENERATION_DATE}}</p>
+	</body>
 
 </html>
