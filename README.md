@@ -7,4 +7,6 @@ A program to generate static HTML files like the ones from pyqscore but from oas
 ## LICENSE
 The code is GPLv2 or later.
 
-Contains data from Openarena and basic CSS file from pyqscore. GPLv2 only licensed.
+Contains data from Openarena.
+
+Templates and css are under the MIT license.
