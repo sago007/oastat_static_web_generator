@@ -10,6 +10,7 @@
 	</head>
 
 	<body>
+		<div class="main-section">
 		<h1>OpenArena Stats</h1>
 
 		<table>
@@ -113,6 +114,7 @@
 		</table>
 
 		<p class="update">Last updated on {{GENERATION_DATE}}</p>
+		</div>
 	</body>
 
 </html>
