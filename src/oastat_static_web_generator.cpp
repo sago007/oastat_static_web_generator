@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
-#include <iomanip> 
+#include <iomanip>
 
 #ifndef VERSIONNUMBER
 #define VERSIONNUMBER "0.1.0"
@@ -72,6 +72,7 @@ std::string timestamp_now_as_string(cppdb::session& database) {
 	return "";
 }
 
+
 static void create_dir_recursive(const std::string& path) {
 	std::string command = std::string("mkdir -p \"")+path+"\"";
 	int ret = std::system(command.c_str());
@@ -104,6 +105,24 @@ std::string getTimeStamp(const tm& _datetime)
 	return s;
 }
 
+class PrintStartEndTimer {
+	std::string name;
+	public:
+	explicit PrintStartEndTimer(const std::string& name) {
+		this->name = name;
+		std::time_t t = std::time(0);
+		std::tm* now = std::localtime(&t);
+		std::cerr << "start_" << name << ": " << getTimeStamp(*now) << "\n";
+	}
+
+	~PrintStartEndTimer() {
+		std::time_t t = std::time(0);
+		std::tm* now = std::localtime(&t);
+		std::cerr << "end_" << name << ": " << getTimeStamp(*now) << "\n";
+	}
+
+};
+
 struct MapInfo {
 	int times_played = {};
 	tm last_played = {};
@@ -116,6 +135,7 @@ static std::map<int, std::map<int, int>> player_weapon_kills;
 static std::map<std::string, MapInfo> map_infos;
 
 void populate_player_deaths(cppdb::session& database, const std::vector<int>& player_ids) {
+	PrintStartEndTimer t("populate_player_deaths");
 	std::string sql = "select count(0) from oastat.oastat_kills k where k.attacker <> k.target and target = ?";
 	cppdb::statement st = database.prepare(sql);
 	for (int player_id : player_ids) {
@@ -130,6 +150,7 @@ void populate_player_deaths(cppdb::session& database, const std::vector<int>& pl
 }
 
 void populate_player_awards(cppdb::session& database, const std::vector<int>& player_ids) {
+	PrintStartEndTimer t("populate_player_awards");
 	std::string sql = "select award, count(0) c from oastat.oastat_awards where player = ? group by  player, award";
 	cppdb::statement st = database.prepare(sql);
 	for (int player_id : player_ids) {
@@ -145,6 +166,7 @@ void populate_player_awards(cppdb::session& database, const std::vector<int>& pl
 }
 
 void populate_player_kills(cppdb::session& database, const std::vector<int>& player_ids) {
+	PrintStartEndTimer t("populate_player_kills");
 	std::string sql = "select modtype, count(0) c from oastat.oastat_kills where attacker <> target and attacker = ? group by modtype";
 	cppdb::statement st = database.prepare(sql);
 	for (int player_id : player_ids) {
@@ -160,6 +182,7 @@ void populate_player_kills(cppdb::session& database, const std::vector<int>& pla
 }
 
 std::vector<int> get_top_killers(cppdb::session& database, int count) {
+	PrintStartEndTimer t("get_top_killers");
 	std::vector<int> ret;
 	std::string sql = "select p.playerid, count(0) c from oastat.oastat_players p, oastat.oastat_kills k where p.playerid = k.attacker and k.attacker <> k.target and p.playerid <> 0 group by p.playerid order by c desc limit ?";
 	cppdb::statement st = database.prepare(sql);
@@ -176,6 +199,7 @@ std::vector<int> get_top_killers(cppdb::session& database, int count) {
 }
 
 std::vector<std::string> get_most_played_maps(cppdb::session& database) {
+	PrintStartEndTimer t("get_most_played_maps");
 	std::vector<std::string> ret;
 	std::string sql = "select mapname, count(0) c, max(time) last_game from oastat.oastat_games group by mapname order by c desc";
 	cppdb::statement st = database.prepare(sql);
@@ -227,6 +251,7 @@ struct OastatGame {
 };
 
 void getRecentGames(cppdb::session& database, std::vector<OastatGame>& games) {
+	PrintStartEndTimer t("getRecentGames");
 	std::string sql = "select gamenumber, gametype, mapname, time, basegame, second, servername from oastat.oastat_games order by gamenumber desc limit 10";
 	cppdb::statement st = database.prepare(sql);
 	cppdb::result res = st.query();
@@ -329,7 +354,7 @@ void write_files(cppdb::session& database) {
 
 
 
-void do_dbtest(cppdb::session& database) {
+void write_current_time(cppdb::session& database) {
 	cppdb::statement st = database.prepare("SELECT now()");
 	cppdb::result res = st.query();
 	if(res.next()) {
@@ -368,7 +393,7 @@ int main(int argc, const char* argv[]) {
 		cmdargs.connectstring = connectstring_env;
 	}
 	cppdb::session database(cmdargs.connectstring);
-	do_dbtest(database);
+	write_current_time(database);
 	create_dir_recursive(cmdargs.output_dir+"/static");
 	create_dir_recursive(cmdargs.output_dir+"/game");
 	copy_static_files("static_content", cmdargs.output_dir+"/static");
