@@ -184,14 +184,15 @@ void populate_player_kills(cppdb::session& database, const std::vector<int>& pla
 std::vector<int> get_top_killers(cppdb::session& database, int count) {
 	PrintStartEndTimer t("get_top_killers");
 	std::vector<int> ret;
-	std::string sql = "select p.playerid, count(0) c from oastat.oastat_players p, oastat.oastat_kills k where p.playerid = k.attacker and k.attacker <> k.target and p.playerid <> 0 group by p.playerid order by c desc limit ?";
+	std::string sql = "select p.playerid, p.isbot b, count(0) c from oastat.oastat_players p, oastat.oastat_kills k where p.playerid = k.attacker and k.attacker <> k.target and p.playerid <> 0 group by p.playerid, p.isbot order by b, c desc limit ?";
 	cppdb::statement st = database.prepare(sql);
 	st.bind(1, count);
 	cppdb::result res = st.query();
 	while(res.next()) {
 		int player_id;
 		int kills;
-		res >> player_id >> kills;
+		std::string isBot;
+		res >> player_id >> isBot >> kills;
 		kills_by_player[player_id] = kills;
 		ret.push_back(player_id);
 	}
