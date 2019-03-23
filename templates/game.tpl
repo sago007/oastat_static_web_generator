@@ -37,6 +37,19 @@
 <body>
 <div class="main-section">
 	<div class="intro">OpenArena Stats - Game {{GAME_NUMBER}}</div>
+	{{GAME_MAP}} at {{GAME_SERVERNAME}}
+	<table>
+		<tr>
+			<th>Player id</th>
+			<th>Score</th>
+		</tr>
+		{{#SCORES_LIST}}
+		<tr>
+			<td>{{ID}}</td>
+			<td>{{SCORE}}</td>
+		</tr>
+		{{/SCORES_LIST}}
+	</table>
 </div>
 </body>
 </html>

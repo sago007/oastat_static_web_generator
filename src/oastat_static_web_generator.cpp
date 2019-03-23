@@ -19,7 +19,6 @@ const size_t MAX_MAP_LIST = 10;
 
 const char* const SAGO_CONNECTION_STRING = "SAGO_CONNECTION_STRING";
 
-void write_html_game(cppdb::session& database, int game_number);
 
 // means of death
 typedef enum {
@@ -251,6 +250,9 @@ struct OastatGame {
 	std::string servername;
 };
 
+
+void write_html_game(cppdb::session& database, const OastatGame& game);
+
 void getRecentGames(cppdb::session& database, std::vector<OastatGame>& games) {
 	PrintStartEndTimer t("getRecentGames");
 	std::string sql = "select gamenumber, gametype, mapname, time, basegame, second, servername from oastat.oastat_games order by gamenumber desc limit 10";
@@ -259,19 +261,41 @@ void getRecentGames(cppdb::session& database, std::vector<OastatGame>& games) {
 	while(res.next()) {
 		OastatGame game;
 		res >> game.gamenumber >> game.gametype >> game.mapname >> game.time >> game.basegame >> game.second >> game.servername;
-		write_html_game(database, game.gamenumber);
+		write_html_game(database, game);
 		games.push_back(game);
 	}
 }
 
-void write_html_game(cppdb::session& database, int game_number) {
+void getGameScoreTotal(cppdb::session& database, int gamenumber, std::vector<std::pair<int,int>>& scores) {
+	std::string sql = "select player, count(0) c from oastat.oastat_points where gamenumber = ? group by player order by c desc";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, gamenumber);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		int playerid;
+		int count;
+		res >> playerid >> count;
+		scores.push_back(std::pair<int,int>(playerid, count));
+	}
+}
+
+void write_html_game(cppdb::session& database, const OastatGame& game) {
 	ctemplate::TemplateDictionary game_tpl("templates/game.tpl");
 	game_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
-	game_tpl.SetValue("GAME_NUMBER", std::to_string(game_number));
+	game_tpl.SetValue("GAME_NUMBER", std::to_string(game.gamenumber));
+	game_tpl.SetValue("GAME_MAP", game.mapname);
+	game_tpl.SetValue("GAME_SERVERNAME", game.servername);
+	std::vector<std::pair<int,int>> scores;
+	getGameScoreTotal(database, game.gamenumber, scores);
+	for (size_t i = 0; i < scores.size(); ++i) {
+		ctemplate::TemplateDictionary* sub_dict = game_tpl.AddSectionDictionary("SCORES_LIST");
+		sub_dict->SetValue("ID", std::to_string(scores.at(i).first));
+		sub_dict->SetValue("SCORE", std::to_string(scores.at(i).second));
+	}
 	std::string output;
 	ctemplate::ExpandTemplate("templates/game.tpl", ctemplate::DO_NOT_STRIP, &game_tpl, &output);
 	std::ofstream myfile;
-	myfile.open (cmdargs.output_dir+"/game/"+std::to_string(game_number)+".html");
+	myfile.open (cmdargs.output_dir+"/game/"+std::to_string(game.gamenumber)+".html");
 	myfile << output;
 	myfile.close();
 }
@@ -349,7 +373,6 @@ void write_html_index(cppdb::session& database) {
 
 void write_files(cppdb::session& database) {
 	write_html_index(database);
-	write_html_game(database, 1);
 }
 
 
