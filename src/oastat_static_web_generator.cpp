@@ -8,6 +8,7 @@
 #include <map>
 #include <sstream>
 #include <iomanip>
+#include "common/common.hpp"
 
 #ifndef VERSIONNUMBER
 #define VERSIONNUMBER "0.1.0"
@@ -18,58 +19,6 @@ CommandArguments cmdargs;
 const size_t MAX_MAP_LIST = 10;
 
 const char* const SAGO_CONNECTION_STRING = "SAGO_CONNECTION_STRING";
-
-
-// means of death
-typedef enum {
-	MOD_UNKNOWN,
-	MOD_SHOTGUN,
-	MOD_GAUNTLET,
-	MOD_MACHINEGUN,
-	MOD_GRENADE,
-	MOD_GRENADE_SPLASH,
-	MOD_ROCKET,
-	MOD_ROCKET_SPLASH,
-	MOD_PLASMA,
-	MOD_PLASMA_SPLASH,
-	MOD_RAILGUN,
-	MOD_LIGHTNING,
-	MOD_BFG,
-	MOD_BFG_SPLASH,
-	MOD_WATER,
-	MOD_SLIME,
-	MOD_LAVA,
-	MOD_CRUSH,
-	MOD_TELEFRAG,
-	MOD_FALLING,
-	MOD_SUICIDE,
-	MOD_TARGET_LASER,
-	MOD_TRIGGER_HURT,
-	MOD_NAIL,
-	MOD_CHAINGUN,
-	MOD_PROXIMITY_MINE,
-	MOD_KAMIKAZE,
-	MOD_JUICED,
-	MOD_GRAPPLE
-} meansOfDeath_t;
-
-#define AWARD_IMPRESSIVE 2
-#define AWARD_EXCELLENT 1
-#define AWARD_GAUNTLET 0
-#define AWARD_DEFENCE 3
-#define AWARD_CAPTURE 4
-#define AWARD_ASSIST 5
-
-std::string timestamp_now_as_string(cppdb::session& database) {
-	cppdb::statement st = database.prepare("SELECT now()");
-	cppdb::result res = st.query();
-	if(res.next()) {
-		std::string value;
-		res >> value;
-		return value;
-	}
-	return "";
-}
 
 
 static void create_dir_recursive(const std::string& path) {
@@ -120,11 +69,6 @@ class PrintStartEndTimer {
 		std::cerr << "end_" << name << ": " << getTimeStamp(*now) << "\n";
 	}
 
-};
-
-struct MapInfo {
-	int times_played = {};
-	tm last_played = {};
 };
 
 static std::map<int, int> kills_by_player;
@@ -214,14 +158,6 @@ std::vector<std::string> get_most_played_maps(cppdb::session& database) {
 	return ret;
 }
 
-struct OastatPlayer {
-	int playerid = 0;
-	std::string nickname;
-	tm lastseen;
-	std::string isBot = "n";
-	std::string model;
-	std::string headmodel;
-};
 
 static std::map<int, OastatPlayer> players;
 
