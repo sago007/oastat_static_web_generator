@@ -279,6 +279,15 @@ void getGameScoreTotal(cppdb::session& database, int gamenumber, std::vector<std
 	}
 }
 
+void addPlayerToTemplateDict(ctemplate::TemplateDictionary* dict, const OastatPlayer& player) {
+	dict->SetValue("PLAYER_ID", std::to_string(player.playerid));
+	dict->SetValue("PLAYER_HEADMODEL", player.headmodel);
+	dict->SetValue("PLAYER_ISBOT", player.isBot);
+	dict->SetValue("PLAYER_LASTSEEN", getTimeStamp(player.lastseen));
+	dict->SetValue("PLAYER_MODEL", player.model);
+	dict->SetValue("PLAYER_NICKNAME", player.nickname);
+}
+
 void write_html_game(cppdb::session& database, const OastatGame& game) {
 	ctemplate::TemplateDictionary game_tpl("templates/game.tpl");
 	game_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
@@ -289,8 +298,10 @@ void write_html_game(cppdb::session& database, const OastatGame& game) {
 	getGameScoreTotal(database, game.gamenumber, scores);
 	for (size_t i = 0; i < scores.size(); ++i) {
 		ctemplate::TemplateDictionary* sub_dict = game_tpl.AddSectionDictionary("SCORES_LIST");
+		const OastatPlayer& p = getPlayer(database, scores.at(i).first);
 		sub_dict->SetValue("ID", std::to_string(scores.at(i).first));
 		sub_dict->SetValue("SCORE", std::to_string(scores.at(i).second));
+		addPlayerToTemplateDict(sub_dict, p);
 	}
 	std::string output;
 	ctemplate::ExpandTemplate("templates/game.tpl", ctemplate::DO_NOT_STRIP, &game_tpl, &output);

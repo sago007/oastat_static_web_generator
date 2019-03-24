@@ -40,12 +40,12 @@
 	{{GAME_MAP}} at {{GAME_SERVERNAME}}
 	<table>
 		<tr>
-			<th>Player id</th>
+			<th>Player</th>
 			<th>Score</th>
 		</tr>
 		{{#SCORES_LIST}}
 		<tr>
-			<td>{{ID}}</td>
+			<td>{{PLAYER_NICKNAME}}</td>
 			<td>{{SCORE}}</td>
 		</tr>
 		{{/SCORES_LIST}}
