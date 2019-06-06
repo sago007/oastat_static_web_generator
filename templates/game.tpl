@@ -38,6 +38,9 @@
 <div class="main-section">
 	<div class="intro">OpenArena Stats - Game {{GAME_NUMBER}}</div>
 	{{GAME_MAP}} at {{GAME_SERVERNAME}}
+        <div class="levelshot">
+            <img src="../static/images/oa640x400/{{GAME_MAP}}.jpg" alt="{{GAME_MAP}}">
+        </div>
 	<table>
 		<tr>
 			<th>Player</th>

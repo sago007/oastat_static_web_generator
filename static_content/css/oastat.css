@@ -61,3 +61,8 @@ tr:nth-child(even) {background: #edebd7}
 .update {
     font-size: 80%;
 }
+
+.levelshot {
+    padding: 10px;
+    text-align: center;
+}
