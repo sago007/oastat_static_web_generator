@@ -37,6 +37,7 @@
 		<div class="main-section">
 		<h1>OpenArena Stats</h1>
 
+		<h2>Most active players</h2>
 		<table>
 			<tr>
 				<th>Name</th>
@@ -67,7 +68,7 @@
 			</tr>
 			{{/PLAYER_LIST}}
 		</table>
-
+		<h2>Weapon kills</h2>
 		<table>
 			<tr>
 				<th>Name</th>
@@ -104,7 +105,7 @@
 			</tr>
 			{{/PLAYER_WEAPON_LIST}}
 		</table>
-
+		<h2>Most played maps</h2>
 		<table>
 			<tr>
 				<th>Map</th>
@@ -119,7 +120,7 @@
 			</tr>
 			{{/MAP_LIST}}
 		</table>
-
+		<h2>Most recent matches</h2>
 		<table>
 			<tr>
 				<th>Game</th>
