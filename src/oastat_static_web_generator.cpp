@@ -247,6 +247,91 @@ void write_html_game(cppdb::session& database, const OastatGame& game) {
 	myfile.close();
 }
 
+std::string getWeaponName(int modtype) {
+	switch(modtype) {
+		case MOD_SHOTGUN: return "Shotgun";
+		case MOD_GAUNTLET: return "Gauntlet";
+		case MOD_MACHINEGUN: return "Machinegun";
+		case MOD_GRENADE:
+		case MOD_GRENADE_SPLASH: return "Grenade";
+		case MOD_ROCKET:
+		case MOD_ROCKET_SPLASH: return "Rocket";
+		case MOD_PLASMA:
+		case MOD_PLASMA_SPLASH: return "Plasma";
+		case MOD_RAILGUN: return "Railgun";
+		case MOD_LIGHTNING: return "Lightning";
+		case MOD_BFG:
+		case MOD_BFG_SPLASH: return "BFG";
+		case MOD_NAIL: return "Nailgun";
+		case MOD_CHAINGUN: return "Chaingun";
+		case MOD_TELEFRAG: return "Telefrag";
+		case MOD_FALLING: return "Falling";
+		default: return "Other";
+	}
+}
+
+void getMapWeaponKills(cppdb::session& database, const std::string& mapname, std::map<int, int>& weapon_kills) {
+	std::string sql = "select k.modtype, count(0) c from oastat.oastat_kills k, oastat.oastat_games g "
+		"where g.gamenumber = k.gamenumber and g.mapname = ? and k.attacker <> k.target "
+		"group by k.modtype order by c desc";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, mapname);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		int modtype;
+		int count;
+		res >> modtype >> count;
+		weapon_kills[modtype] = count;
+	}
+}
+
+void getMapRecentGames(cppdb::session& database, const std::string& mapname, std::vector<OastatGame>& games) {
+	std::string sql = "select gamenumber, gametype, mapname, time, basegame, second, servername "
+		"from oastat.oastat_games where mapname = ? order by gamenumber desc limit 10";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, mapname);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		OastatGame game;
+		res >> game.gamenumber >> game.gametype >> game.mapname >> game.time >> game.basegame >> game.second >> game.servername;
+		games.push_back(game);
+		write_html_game(database, game);
+	}
+}
+
+void write_html_map(cppdb::session& database, const std::string& mapname) {
+	ctemplate::TemplateDictionary map_tpl("templates/map.tpl");
+	map_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
+	map_tpl.SetValue("MAP_NAME", mapname);
+
+	// Get weapon kills for this map
+	std::map<int, int> weapon_kills;
+	getMapWeaponKills(database, mapname, weapon_kills);
+	for (const auto& wk : weapon_kills) {
+		ctemplate::TemplateDictionary* sub_dict = map_tpl.AddSectionDictionary("WEAPON_KILLS");
+		sub_dict->SetValue("WEAPON_NAME", getWeaponName(wk.first));
+		sub_dict->SetValue("KILL_COUNT", std::to_string(wk.second));
+	}
+
+	// Get recent matches for this map
+	std::vector<OastatGame> games;
+	getMapRecentGames(database, mapname, games);
+	for (size_t i = 0; i < games.size(); ++i) {
+		const OastatGame& game = games[i];
+		ctemplate::TemplateDictionary* sub_dict = map_tpl.AddSectionDictionary("RECENT_MATCHES");
+		sub_dict->SetValue("GAMENUMBER", std::to_string(game.gamenumber));
+		sub_dict->SetValue("TIME", getTimeStamp(game.time));
+		sub_dict->SetValue("SERVERNAME", game.servername);
+	}
+
+	std::string output;
+	ctemplate::ExpandTemplate("templates/map.tpl", ctemplate::DO_NOT_STRIP, &map_tpl, &output);
+	std::ofstream myfile;
+	myfile.open (cmdargs.output_dir+"/map/"+mapname+".html");
+	myfile << output;
+	myfile.close();
+}
+
 void write_html_index(cppdb::session& database) {
 	ctemplate::TemplateDictionary index_tpl("templates/index.tpl");
 	index_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
@@ -320,6 +405,11 @@ void write_html_index(cppdb::session& database) {
 
 void write_files(cppdb::session& database) {
 	write_html_index(database);
+	// Generate map pages
+	std::vector<std::string> map_list = get_most_played_maps(database);
+	for (const std::string& mapname : map_list) {
+		write_html_map(database, mapname);
+	}
 }
 
 
@@ -367,6 +457,7 @@ int main(int argc, const char* argv[]) {
 	write_current_time(database);
 	create_dir_recursive(cmdargs.output_dir+"/static");
 	create_dir_recursive(cmdargs.output_dir+"/game");
+	create_dir_recursive(cmdargs.output_dir+"/map");
 	copy_static_files("static_content", cmdargs.output_dir+"/static");
 	write_files(database);
 	return 0;

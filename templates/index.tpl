@@ -114,7 +114,7 @@
 			</tr>
 			{{#MAP_LIST}}
 			<tr>
-				<td>{{MAP_NAME}}</td>
+				<td><a href="map/{{MAP_NAME}}.html">{{MAP_NAME}}</a></td>
 				<td>{{TIMES_PLAYED}}</td>
 				<td>{{LAST_PLAYED}}</td>
 			</tr>
