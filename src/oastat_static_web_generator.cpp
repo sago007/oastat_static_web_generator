@@ -6,6 +6,7 @@
 #include <ctemplate/template.h>
 #include <vector>
 #include <map>
+#include <set>
 #include <sstream>
 #include <iomanip>
 #include "common/common.hpp"
@@ -76,6 +77,8 @@ static std::map<int, int> player_deaths;
 static std::map<int, std::map<int, int>> player_awards;
 static std::map<int, std::map<int, int>> player_weapon_kills;
 static std::map<std::string, MapInfo> map_infos;
+static std::set<int> generated_games;
+static std::set<std::string> generated_maps;
 
 void populate_player_deaths(cppdb::session& database, const std::vector<int>& player_ids) {
 	PrintStartEndTimer t("populate_player_deaths");
@@ -225,6 +228,11 @@ void addPlayerToTemplateDict(ctemplate::TemplateDictionary* dict, const OastatPl
 }
 
 void write_html_game(cppdb::session& database, const OastatGame& game) {
+	// Skip if already generated
+	if (generated_games.count(game.gamenumber)) {
+		return;
+	}
+	generated_games.insert(game.gamenumber);
 	ctemplate::TemplateDictionary game_tpl("templates/game.tpl");
 	game_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
 	game_tpl.SetValue("GAME_NUMBER", std::to_string(game.gamenumber));
@@ -300,6 +308,11 @@ void getMapRecentGames(cppdb::session& database, const std::string& mapname, std
 }
 
 void write_html_map(cppdb::session& database, const std::string& mapname) {
+	// Skip if already generated
+	if (generated_maps.count(mapname)) {
+		return;
+	}
+	generated_maps.insert(mapname);
 	ctemplate::TemplateDictionary map_tpl("templates/map.tpl");
 	map_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
 	map_tpl.SetValue("MAP_NAME", mapname);
