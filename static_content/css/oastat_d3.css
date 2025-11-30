@@ -1,0 +1,42 @@
+/* D3.js visualizations styles */
+
+.pie-chart {
+	display: flex;
+	justify-content: center;
+	margin: 20px 0;
+}
+
+.pie-chart svg {
+	font-family: Arial, sans-serif;
+}
+
+.pie-slice {
+	stroke: #fff;
+	stroke-width: 2px;
+}
+
+.pie-label {
+	fill: #333;
+	font-size: 12px;
+	pointer-events: none;
+}
+
+.legend {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin: 10px 0;
+	gap: 10px;
+}
+
+.legend-item {
+	display: flex;
+	align-items: center;
+	margin: 5px;
+}
+
+.legend-color {
+	width: 15px;
+	height: 15px;
+	margin-right: 5px;
+}
