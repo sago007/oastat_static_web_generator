@@ -307,6 +307,10 @@ void getMapRecentGames(cppdb::session& database, const std::string& mapname, std
 	}
 }
 
+bool compareWeaponKillsDesc(const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
+	return a.second > b.second;
+}
+
 void write_html_map(cppdb::session& database, const std::string& mapname) {
 	// Skip if already generated
 	if (generated_maps.count(mapname)) {
@@ -337,12 +341,19 @@ void write_html_map(cppdb::session& database, const std::string& mapname) {
 	combined_weapon_kills["Telefrag"] = weapon_kills[MOD_TELEFRAG];
 	combined_weapon_kills["Falling"] = weapon_kills[MOD_FALLING];
 
+	// Sort weapons by kill count (descending)
+	std::vector<std::pair<std::string, int>> sorted_weapons;
 	for (const auto& wk : combined_weapon_kills) {
 		if (wk.second > 0) {
-			ctemplate::TemplateDictionary* sub_dict = map_tpl.AddSectionDictionary("WEAPON_KILLS");
-			sub_dict->SetValue("WEAPON_NAME", wk.first);
-			sub_dict->SetValue("KILL_COUNT", std::to_string(wk.second));
+			sorted_weapons.push_back(wk);
 		}
+	}
+	std::stable_sort(sorted_weapons.begin(), sorted_weapons.end(), compareWeaponKillsDesc);
+
+	for (const auto& wk : sorted_weapons) {
+		ctemplate::TemplateDictionary* sub_dict = map_tpl.AddSectionDictionary("WEAPON_KILLS");
+		sub_dict->SetValue("WEAPON_NAME", wk.first);
+		sub_dict->SetValue("KILL_COUNT", std::to_string(wk.second));
 	}
 
 	// Get recent matches for this map
