@@ -320,10 +320,29 @@ void write_html_map(cppdb::session& database, const std::string& mapname) {
 	// Get weapon kills for this map
 	std::map<int, int> weapon_kills;
 	getMapWeaponKills(database, mapname, weapon_kills);
-	for (const auto& wk : weapon_kills) {
-		ctemplate::TemplateDictionary* sub_dict = map_tpl.AddSectionDictionary("WEAPON_KILLS");
-		sub_dict->SetValue("WEAPON_NAME", getWeaponName(wk.first));
-		sub_dict->SetValue("KILL_COUNT", std::to_string(wk.second));
+
+	// Combine splash damage with base weapon damage
+	std::map<std::string, int> combined_weapon_kills;
+	combined_weapon_kills["Shotgun"] = weapon_kills[MOD_SHOTGUN];
+	combined_weapon_kills["Gauntlet"] = weapon_kills[MOD_GAUNTLET];
+	combined_weapon_kills["Machinegun"] = weapon_kills[MOD_MACHINEGUN];
+	combined_weapon_kills["Grenade"] = weapon_kills[MOD_GRENADE] + weapon_kills[MOD_GRENADE_SPLASH];
+	combined_weapon_kills["Rocket"] = weapon_kills[MOD_ROCKET] + weapon_kills[MOD_ROCKET_SPLASH];
+	combined_weapon_kills["Plasma"] = weapon_kills[MOD_PLASMA] + weapon_kills[MOD_PLASMA_SPLASH];
+	combined_weapon_kills["Railgun"] = weapon_kills[MOD_RAILGUN];
+	combined_weapon_kills["Lightning"] = weapon_kills[MOD_LIGHTNING];
+	combined_weapon_kills["Nailgun"] = weapon_kills[MOD_NAIL];
+	combined_weapon_kills["Chaingun"] = weapon_kills[MOD_CHAINGUN];
+	combined_weapon_kills["BFG"] = weapon_kills[MOD_BFG] + weapon_kills[MOD_BFG_SPLASH];
+	combined_weapon_kills["Telefrag"] = weapon_kills[MOD_TELEFRAG];
+	combined_weapon_kills["Falling"] = weapon_kills[MOD_FALLING];
+
+	for (const auto& wk : combined_weapon_kills) {
+		if (wk.second > 0) {
+			ctemplate::TemplateDictionary* sub_dict = map_tpl.AddSectionDictionary("WEAPON_KILLS");
+			sub_dict->SetValue("WEAPON_NAME", wk.first);
+			sub_dict->SetValue("KILL_COUNT", std::to_string(wk.second));
+		}
 	}
 
 	// Get recent matches for this map
