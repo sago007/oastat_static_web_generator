@@ -189,6 +189,12 @@ struct OastatGame {
 	std::string servername;
 };
 
+struct ScorePoint {
+	int playerid = 0;
+	int second = 0;
+	int score = 0;
+};
+
 
 void write_html_game(cppdb::session& database, const OastatGame& game);
 
@@ -218,6 +224,18 @@ void getGameScoreTotal(cppdb::session& database, int gamenumber, std::vector<std
 	}
 }
 
+void getGameScoreProgression(cppdb::session& database, int gamenumber, std::vector<ScorePoint>& progression) {
+	std::string sql = "SELECT player, `second` as the_second, score FROM oastat.oastat_points where gamenumber = ? ORDER BY the_second, player";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, gamenumber);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		ScorePoint point;
+		res >> point.playerid >> point.second >> point.score;
+		progression.push_back(point);
+	}
+}
+
 void addPlayerToTemplateDict(ctemplate::TemplateDictionary* dict, const OastatPlayer& player) {
 	dict->SetValue("PLAYER_ID", std::to_string(player.playerid));
 	dict->SetValue("PLAYER_HEADMODEL", player.headmodel);
@@ -238,6 +256,7 @@ void write_html_game(cppdb::session& database, const OastatGame& game) {
 	game_tpl.SetValue("GAME_NUMBER", std::to_string(game.gamenumber));
 	game_tpl.SetValue("GAME_MAP", game.mapname);
 	game_tpl.SetValue("GAME_SERVERNAME", game.servername);
+	
 	std::vector<std::pair<int,int>> scores;
 	getGameScoreTotal(database, game.gamenumber, scores);
 	for (size_t i = 0; i < scores.size(); ++i) {
@@ -247,6 +266,45 @@ void write_html_game(cppdb::session& database, const OastatGame& game) {
 		sub_dict->SetValue("SCORE", std::to_string(scores.at(i).second));
 		addPlayerToTemplateDict(sub_dict, p);
 	}
+	
+	// Get score progression for chart
+	std::vector<ScorePoint> progression;
+	getGameScoreProgression(database, game.gamenumber, progression);
+	
+	// Build JSON data for D3.js chart
+	// Group by player to create series
+	std::map<int, std::vector<ScorePoint>> playerSeries;
+	for (const auto& point : progression) {
+		playerSeries[point.playerid].push_back(point);
+	}
+	
+	// Generate JSON for each player's score progression
+	std::stringstream json_data;
+	json_data << "[";
+	bool first_player = true;
+	for (const auto& series : playerSeries) {
+		if (!first_player) json_data << ",";
+		first_player = false;
+		
+		const OastatPlayer& p = getPlayer(database, series.first);
+		json_data << "{\"player\":\"" << p.nickname << "\",\"playerid\":" << series.first << ",\"data\":[";
+		
+		bool first_point = true;
+		for (const auto& point : series.second) {
+			if (!first_point) json_data << ",";
+			first_point = false;
+			json_data << "{\"second\":" << point.second << ",\"score\":" << point.score << "}";
+		}
+		json_data << "]}";
+	}
+	json_data << "]";
+	
+	// Write JSON to separate file
+	std::ofstream json_file;
+	json_file.open(cmdargs.output_dir+"/game/"+std::to_string(game.gamenumber)+".json");
+	json_file << json_data.str();
+	json_file.close();
+	
 	std::string output;
 	ctemplate::ExpandTemplate("templates/game.tpl", ctemplate::DO_NOT_STRIP, &game_tpl, &output);
 	std::ofstream myfile;
