@@ -30,12 +30,20 @@
 		<meta http-equiv="Content-Language" content="en">
 		<meta name="description" content="OpenArena stats by oastats">
 		<link rel="stylesheet" href="static/css/oastat.css" type="text/css">
+		<script src="static/js/player-name-colors.js"></script>
 		<title>OpenArena Stats</title>
 	</head>
 
 	<body>
 		<div class="main-section">
 		<h1>OpenArena Stats</h1>
+
+		<div style="margin: 15px 0; padding: 10px; background-color: #f0f0f0; border-radius: 5px;">
+			<label style="cursor: pointer; display: inline-flex; align-items: center;">
+				<input type="checkbox" id="player-color-toggle" style="margin-right: 8px;">
+				<span>Enable player name colors</span>
+			</label>
+		</div>
 
 		<h2>Most active players</h2>
 		<table>
