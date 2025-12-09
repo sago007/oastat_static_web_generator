@@ -38,7 +38,8 @@ function parsePlayerNameColors(name) {
 		const textBefore = name.substring(lastIndex, match.index);
 		if (textBefore) {
 			if (currentColor) {
-				result += `<span style="color: ${currentColor}">${escapeHtml(textBefore)}</span>`;
+				const style = getColorStyle(currentColor);
+				result += `<span style="${style}">${escapeHtml(textBefore)}</span>`;
 			} else {
 				result += escapeHtml(textBefore);
 			}
@@ -55,13 +56,27 @@ function parsePlayerNameColors(name) {
 	const remainingText = name.substring(lastIndex);
 	if (remainingText) {
 		if (currentColor) {
-			result += `<span style="color: ${currentColor}">${escapeHtml(remainingText)}</span>`;
+			const style = getColorStyle(currentColor);
+			result += `<span style="${style}">${escapeHtml(remainingText)}</span>`;
 		} else {
 			result += escapeHtml(remainingText);
 		}
 	}
 
 	return result || escapeHtml(name);
+}
+
+/**
+ * Get the style string for a color, adding black background for white text
+ * @param {string} color - The color hex code
+ * @returns {string} CSS style string
+ */
+function getColorStyle(color) {
+	// Add black background for white text to make it visible
+	if (color === '#FFFFFF') {
+		return `color: ${color}; background-color: #000000; padding: 0 2px;`;
+	}
+	return `color: ${color}`;
 }
 
 /**
