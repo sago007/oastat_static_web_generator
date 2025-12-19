@@ -1,3 +1,6 @@
+#ifndef COMMON_HPP
+#define COMMON_HPP
+
 #include <string>
 #include <cppdb/frontend.h>
 
@@ -58,3 +61,5 @@ struct OastatPlayer {
 };
 
 std::string timestamp_now_as_string(cppdb::session& database);
+
+#endif // COMMON_HPP

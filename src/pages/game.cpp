@@ -1,0 +1,122 @@
+#include "pages.hpp"
+#include "../common/common.hpp"
+#include <ctemplate/template.h>
+#include <fstream>
+#include <sstream>
+#include <set>
+
+static void addPlayerToTemplateDict(ctemplate::TemplateDictionary* dict, const OastatPlayer& player) {
+	dict->SetValue("PLAYER_ID", std::to_string(player.playerid));
+	dict->SetValue("PLAYER_HEADMODEL", player.headmodel);
+	dict->SetValue("PLAYER_ISBOT", player.isBot);
+	dict->SetValue("PLAYER_LASTSEEN", getTimeStamp(player.lastseen));
+	dict->SetValue("PLAYER_MODEL", player.model);
+	dict->SetValue("PLAYER_NICKNAME", player.nickname);
+}
+
+void write_html_game(cppdb::session& database, const OastatGame& game, const std::string& output_dir) {
+	// Skip if already generated
+	auto& generated_games = get_generated_games();
+	if (generated_games.count(game.gamenumber)) {
+		return;
+	}
+	generated_games.insert(game.gamenumber);
+
+	ctemplate::TemplateDictionary game_tpl("templates/game.tpl");
+	game_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
+	game_tpl.SetValue("GAME_NUMBER", std::to_string(game.gamenumber));
+	game_tpl.SetValue("GAME_MAP", game.mapname);
+	game_tpl.SetValue("GAME_SERVERNAME", game.servername);
+
+	std::vector<std::pair<int,int>> scores;
+	getGameScoreTotal(database, game.gamenumber, scores);
+	for (size_t i = 0; i < scores.size(); ++i) {
+		ctemplate::TemplateDictionary* sub_dict = game_tpl.AddSectionDictionary("SCORES_LIST");
+		const OastatPlayer& p = getPlayer(database, scores.at(i).first);
+		sub_dict->SetValue("ID", std::to_string(scores.at(i).first));
+		sub_dict->SetValue("SCORE", std::to_string(scores.at(i).second));
+		addPlayerToTemplateDict(sub_dict, p);
+	}
+
+	// Get score progression for chart
+	std::vector<ScorePoint> progression;
+	getGameScoreProgression(database, game.gamenumber, progression);
+
+	// Build JSON data for D3.js chart
+	// Group by player to create series
+	std::map<int, std::vector<ScorePoint>> playerSeries;
+	for (const auto& point : progression) {
+		playerSeries[point.playerid].push_back(point);
+	}
+
+	// Generate JSON for each player's score progression
+	std::stringstream json_data;
+	json_data << "[";
+	bool first_player = true;
+	for (const auto& series : playerSeries) {
+		if (!first_player) json_data << ",";
+		first_player = false;
+
+		const OastatPlayer& p = getPlayer(database, series.first);
+		json_data << "{\"player\":\"" << p.nickname << "\",\"playerid\":" << series.first << ",\"data\":[";
+
+		bool first_point = true;
+		for (const auto& point : series.second) {
+			if (!first_point) json_data << ",";
+			first_point = false;
+			json_data << "{\"second\":" << point.second << ",\"score\":" << point.score << "}";
+		}
+		json_data << "]}";
+	}
+	json_data << "]";
+
+	// Write JSON to separate file
+	std::ofstream json_file;
+	json_file.open(output_dir + "/game/" + std::to_string(game.gamenumber) + ".json");
+	json_file << json_data.str();
+	json_file.close();
+
+	std::string output;
+	ctemplate::ExpandTemplate("templates/game.tpl", ctemplate::DO_NOT_STRIP, &game_tpl, &output);
+	std::ofstream myfile;
+	myfile.open(output_dir + "/game/" + std::to_string(game.gamenumber) + ".html");
+	myfile << output;
+	myfile.close();
+}
+
+void getRecentGames(cppdb::session& database, std::vector<OastatGame>& games) {
+	std::string sql = "select gamenumber, gametype, mapname, time, basegame, second, servername from oastat.oastat_games order by gamenumber desc limit 10";
+	cppdb::statement st = database.prepare(sql);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		OastatGame game;
+		res >> game.gamenumber >> game.gametype >> game.mapname >> game.time >> game.basegame >> game.second >> game.servername;
+		games.push_back(game);
+	}
+}
+
+void getGameScoreTotal(cppdb::session& database, int gamenumber, std::vector<std::pair<int,int>>& scores) {
+	std::string sql = "select player, count(0) c from oastat.oastat_points where gamenumber = ? group by player order by c desc";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, gamenumber);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		int playerid;
+		int count;
+		res >> playerid >> count;
+		scores.push_back(std::pair<int,int>(playerid, count));
+	}
+}
+
+void getGameScoreProgression(cppdb::session& database, int gamenumber, std::vector<ScorePoint>& progression) {
+	std::string sql = "SELECT player, `second` as the_second, score FROM oastat.oastat_points where gamenumber = ? ORDER BY the_second, player";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, gamenumber);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		ScorePoint point;
+		res >> point.playerid >> point.second >> point.score;
+		progression.push_back(point);
+	}
+}
+
