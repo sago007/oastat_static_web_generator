@@ -107,3 +107,20 @@ td {
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+/* Kill matrix styling */
+.kill-matrix {
+    font-size: 0.9em;
+}
+
+.kill-matrix th:first-child,
+.kill-matrix td:first-child {
+    text-align: left;
+    font-weight: 600;
+}
+
+.kill-matrix td.has-kills {
+    background: #e8f5e9;
+    font-weight: 600;
+    color: #2e7d32;
+}

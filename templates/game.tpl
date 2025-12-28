@@ -44,11 +44,11 @@
         <div class="levelshot">
             <img src="../static/images/oa640x400/{{GAME_MAP}}.jpg" alt="{{GAME_MAP}}">
         </div>
-	
+
 	<h2>Score Progression Over Time</h2>
 	<div id="score-chart" style="margin: 20px 0;"></div>
 	<div id="score-legend" class="legend"></div>
-	
+
 	<h2>Final Scores</h2>
 	<table>
 		<tr>
@@ -62,7 +62,27 @@
 		</tr>
 		{{/SCORES_LIST}}
 	</table>
-	
+
+	{{#HAS_KILL_MATRIX}}
+	<h2>Kill Matrix</h2>
+	<table class="kill-matrix">
+		<tr>
+			<th>Killer \ Victim</th>
+			{{#MATRIX_HEADER}}
+			<th>{{PLAYER_NICKNAME}}</th>
+			{{/MATRIX_HEADER}}
+		</tr>
+		{{#MATRIX_ROWS}}
+		<tr>
+			<td><strong>{{KILLER_NICKNAME}}</strong></td>
+			{{#MATRIX_CELLS}}
+			<td{{#HAS_KILLS}} class="has-kills"{{/HAS_KILLS}}>{{KILL_COUNT}}</td>
+			{{/MATRIX_CELLS}}
+		</tr>
+		{{/MATRIX_ROWS}}
+	</table>
+	{{/HAS_KILL_MATRIX}}
+
 	<script>
 		// Render score chart with game data
 		renderScoreChart("{{GAME_NUMBER}}.json");

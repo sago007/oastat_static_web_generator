@@ -76,6 +76,39 @@ void write_html_game(cppdb::session& database, const OastatGame& game, const std
 	json_file << json_data.str();
 	json_file.close();
 
+	// Get kill matrix
+	std::map<std::pair<int,int>, int> kill_matrix;
+	std::vector<int> matrix_players;
+	getGameKillMatrix(database, game.gamenumber, kill_matrix, matrix_players);
+
+	// Add kill matrix to template
+	if (!matrix_players.empty()) {
+		game_tpl.ShowSection("HAS_KILL_MATRIX");
+
+		// Add header row with player names
+		for (int playerid : matrix_players) {
+			ctemplate::TemplateDictionary* header_dict = game_tpl.AddSectionDictionary("MATRIX_HEADER");
+			const OastatPlayer& p = getPlayer(database, playerid);
+			header_dict->SetValue("PLAYER_NICKNAME", p.nickname);
+		}
+
+		// Add data rows
+		for (int killer : matrix_players) {
+			ctemplate::TemplateDictionary* row_dict = game_tpl.AddSectionDictionary("MATRIX_ROWS");
+			const OastatPlayer& killer_player = getPlayer(database, killer);
+			row_dict->SetValue("KILLER_NICKNAME", killer_player.nickname);
+			for (int victim : matrix_players) {
+				ctemplate::TemplateDictionary* cell_dict = row_dict->AddSectionDictionary("MATRIX_CELLS");
+				auto key = std::make_pair(killer, victim);
+				int kills = kill_matrix.count(key) ? kill_matrix[key] : 0;
+				cell_dict->SetValue("KILL_COUNT", std::to_string(kills));
+				if (kills > 0) {
+					cell_dict->ShowSection("HAS_KILLS");
+				}
+			}
+		}
+	}
+
 	std::string output;
 	ctemplate::ExpandTemplate("templates/game.tpl", ctemplate::DO_NOT_STRIP, &game_tpl, &output);
 	std::ofstream myfile;
@@ -118,6 +151,34 @@ void getGameScoreProgression(cppdb::session& database, int gamenumber, std::vect
 		ScorePoint point;
 		res >> point.playerid >> point.second >> point.score;
 		progression.push_back(point);
+	}
+}
+
+void getGameKillMatrix(cppdb::session& database, int gamenumber, std::map<std::pair<int,int>, int>& matrix, std::vector<int>& players) {
+	// Get all players in the game
+	std::set<int> player_set;
+	std::string sql_players = "SELECT DISTINCT player FROM oastat.oastat_points WHERE gamenumber = ?";
+	cppdb::statement st_players = database.prepare(sql_players);
+	st_players.bind(1, gamenumber);
+	cppdb::result res_players = st_players.query();
+	while(res_players.next()) {
+		int playerid;
+		res_players >> playerid;
+		player_set.insert(playerid);
+	}
+
+	// Convert to vector for ordered iteration
+	players.assign(player_set.begin(), player_set.end());
+
+	// Get kill data
+	std::string sql = "SELECT attacker, target, COUNT(0) as kills FROM oastat.oastat_kills WHERE gamenumber = ? AND attacker <> target GROUP BY attacker, target";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, gamenumber);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		int attacker, target, kills;
+		res >> attacker >> target >> kills;
+		matrix[std::make_pair(attacker, target)] = kills;
 	}
 }
 

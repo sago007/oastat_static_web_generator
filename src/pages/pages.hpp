@@ -42,6 +42,7 @@ void getMapRecentGames(cppdb::session& database, const std::string& mapname, std
 void getRecentGames(cppdb::session& database, std::vector<OastatGame>& games);
 void getGameScoreTotal(cppdb::session& database, int gamenumber, std::vector<std::pair<int,int>>& scores);
 void getGameScoreProgression(cppdb::session& database, int gamenumber, std::vector<ScorePoint>& progression);
+void getGameKillMatrix(cppdb::session& database, int gamenumber, std::map<std::pair<int,int>, int>& matrix, std::vector<int>& players);
 
 // Page generation functions
 void write_html_index(cppdb::session& database, const std::string& output_dir);
