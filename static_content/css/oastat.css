@@ -111,16 +111,78 @@ td {
 /* Kill matrix styling */
 .kill-matrix {
     font-size: 0.9em;
+    border: 2px solid #34495e;
 }
 
-.kill-matrix th:first-child,
-.kill-matrix td:first-child {
+/* Top-left corner cell - diagonal split appearance */
+.kill-matrix th:first-child {
+    background: linear-gradient(to top right, #34495e 0%, #34495e 49.5%, #fff 49.5%, #fff 50.5%, #5d6d7e 50.5%, #5d6d7e 100%);
+    color: #333;
+    text-align: center;
+    font-size: 0.75em;
+    position: relative;
+    padding: 8px;
+}
+
+/* Column headers (victims) */
+.kill-matrix thead th:not(:first-child) {
+    background: #5d6d7e;
+    color: #ffffff;
+    writing-mode: horizontal-tb;
+    text-align: center;
+    font-size: 0.8em;
+    min-width: 60px;
+    padding: 10px 5px;
+}
+
+/* Row headers (killers) */
+.kill-matrix tbody td:first-child {
+    background: #5d6d7e;
+    color: #ffffff;
     text-align: left;
     font-weight: 600;
+    padding-left: 12px;
+    min-width: 120px;
+}
+
+/* Data cells */
+.kill-matrix tbody td:not(:first-child) {
+    background: #f8f9fa;
+    text-align: center;
+    color: #95a5a6;
+    font-weight: normal;
 }
 
 .kill-matrix td.has-kills {
-    background: #e8f5e9;
-    font-weight: 600;
-    color: #2e7d32;
+    background: #d4edda;
+    font-weight: 700;
+    color: #155724;
+    font-size: 1.1em;
+}
+
+.kill-matrix td.diagonal {
+    background: #34495e;
+    color: #95a5a6;
+    font-style: italic;
+}
+
+/* Remove hover effect from kill matrix */
+.kill-matrix tr:hover {
+    background: inherit;
+}
+
+.kill-matrix tbody tr:hover td:not(:first-child) {
+    background: #e9ecef;
+}
+
+.kill-matrix tbody tr:hover td.has-kills {
+    background: #c3e6cb;
+}
+
+.kill-matrix tbody tr:hover td.diagonal {
+    background: #2c3e50;
+}
+
+.kill-matrix tbody tr:hover td:first-child {
+    background: #4a5f7f;
 }

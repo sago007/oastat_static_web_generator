@@ -66,20 +66,24 @@
 	{{#HAS_KILL_MATRIX}}
 	<h2>Kill Matrix</h2>
 	<table class="kill-matrix">
+		<thead>
 		<tr>
-			<th>Killer \ Victim</th>
+			<th>Killer ⟍ Victim</th>
 			{{#MATRIX_HEADER}}
 			<th>{{PLAYER_NICKNAME}}</th>
 			{{/MATRIX_HEADER}}
 		</tr>
+		</thead>
+		<tbody>
 		{{#MATRIX_ROWS}}
 		<tr>
-			<td><strong>{{KILLER_NICKNAME}}</strong></td>
+			<td>{{KILLER_NICKNAME}}</td>
 			{{#MATRIX_CELLS}}
-			<td{{#HAS_KILLS}} class="has-kills"{{/HAS_KILLS}}>{{KILL_COUNT}}</td>
+			<td{{#HAS_KILLS}} class="has-kills"{{/HAS_KILLS}}{{#IS_DIAGONAL}} class="diagonal"{{/IS_DIAGONAL}}>{{KILL_COUNT}}</td>
 			{{/MATRIX_CELLS}}
 		</tr>
 		{{/MATRIX_ROWS}}
+		</tbody>
 	</table>
 	{{/HAS_KILL_MATRIX}}
 

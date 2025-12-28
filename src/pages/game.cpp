@@ -105,6 +105,9 @@ void write_html_game(cppdb::session& database, const OastatGame& game, const std
 				if (kills > 0) {
 					cell_dict->ShowSection("HAS_KILLS");
 				}
+				if (killer == victim) {
+					cell_dict->ShowSection("IS_DIAGONAL");
+				}
 			}
 		}
 	}
