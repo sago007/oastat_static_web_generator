@@ -96,15 +96,16 @@ void getRecentGames(cppdb::session& database, std::vector<OastatGame>& games) {
 }
 
 void getGameScoreTotal(cppdb::session& database, int gamenumber, std::vector<std::pair<int,int>>& scores) {
-	std::string sql = "select player, count(0) c from oastat.oastat_points where gamenumber = ? group by player order by c desc";
+	std::string sql = "SELECT player, score FROM oastat.oastat_points p1 WHERE gamenumber = ? AND second = (SELECT MAX(second) FROM oastat.oastat_points p2 WHERE p2.player = p1.player AND p2.gamenumber = ?) ORDER BY score DESC";
 	cppdb::statement st = database.prepare(sql);
 	st.bind(1, gamenumber);
+	st.bind(2, gamenumber);
 	cppdb::result res = st.query();
 	while(res.next()) {
 		int playerid;
-		int count;
-		res >> playerid >> count;
-		scores.push_back(std::pair<int,int>(playerid, count));
+		int score;
+		res >> playerid >> score;
+		scores.push_back(std::pair<int,int>(playerid, score));
 	}
 }
 
