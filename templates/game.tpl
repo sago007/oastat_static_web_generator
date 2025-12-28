@@ -35,6 +35,7 @@
 	<link rel="stylesheet" href="../static/css/oastat_d3.css" type="text/css">
 	<script src="https://d3js.org/d3.v7.min.js"></script>
 	<script src="../static/js/score-chart.js"></script>
+	<script src="../static/js/weapon-pie-chart.js"></script>
 	<title>OpenArena Stats - Game {{GAME_NUMBER}}</title>
 </head>
 <body>
@@ -87,9 +88,43 @@
 	</table>
 	{{/HAS_KILL_MATRIX}}
 
+	{{#HAS_WEAPON_KILLS}}
+	<h2>Weapon Kills in this Game</h2>
+
+	<div class="pie-chart">
+		<div id="weapon-pie-chart"></div>
+	</div>
+	<div class="legend" id="weapon-legend"></div>
+
+	<table>
+		<tr>
+			<th>Weapon</th>
+			<th>Kills</th>
+		</tr>
+		{{#WEAPON_KILLS}}
+		<tr>
+			<td>{{WEAPON_NAME}}</td>
+			<td>{{KILL_COUNT}}</td>
+		</tr>
+		{{/WEAPON_KILLS}}
+	</table>
+	{{/HAS_WEAPON_KILLS}}
+
 	<script>
 		// Render score chart with game data
 		renderScoreChart("{{GAME_NUMBER}}.json");
+
+		{{#HAS_WEAPON_KILLS}}
+		// Weapon kills data
+		const weaponData = [
+			{{#WEAPON_KILLS}}
+			{name: "{{WEAPON_NAME}}", value: {{KILL_COUNT}}},
+			{{/WEAPON_KILLS}}
+		];
+
+		// Render weapon pie chart with data
+		renderWeaponPieChart(weaponData);
+		{{/HAS_WEAPON_KILLS}}
 	</script>
 </div>
 </body>

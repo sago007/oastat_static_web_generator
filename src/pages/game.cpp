@@ -4,6 +4,11 @@
 #include <fstream>
 #include <sstream>
 #include <set>
+#include <algorithm>
+
+static bool compareWeaponKillsDesc(const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
+	return a.second > b.second;
+}
 
 static void addPlayerToTemplateDict(ctemplate::TemplateDictionary* dict, const OastatPlayer& player) {
 	dict->SetValue("PLAYER_ID", std::to_string(player.playerid));
@@ -112,6 +117,44 @@ void write_html_game(cppdb::session& database, const OastatGame& game, const std
 		}
 	}
 
+	// Get weapon kills for this game
+	std::map<int, int> weapon_kills;
+	getGameWeaponKills(database, game.gamenumber, weapon_kills);
+
+	// Combine splash damage with base weapon damage
+	std::map<std::string, int> combined_weapon_kills;
+	combined_weapon_kills["Shotgun"] = weapon_kills[MOD_SHOTGUN];
+	combined_weapon_kills["Gauntlet"] = weapon_kills[MOD_GAUNTLET];
+	combined_weapon_kills["Machinegun"] = weapon_kills[MOD_MACHINEGUN];
+	combined_weapon_kills["Grenade"] = weapon_kills[MOD_GRENADE] + weapon_kills[MOD_GRENADE_SPLASH];
+	combined_weapon_kills["Rocket"] = weapon_kills[MOD_ROCKET] + weapon_kills[MOD_ROCKET_SPLASH];
+	combined_weapon_kills["Plasma"] = weapon_kills[MOD_PLASMA] + weapon_kills[MOD_PLASMA_SPLASH];
+	combined_weapon_kills["Railgun"] = weapon_kills[MOD_RAILGUN];
+	combined_weapon_kills["Lightning"] = weapon_kills[MOD_LIGHTNING];
+	combined_weapon_kills["Nailgun"] = weapon_kills[MOD_NAIL];
+	combined_weapon_kills["Chaingun"] = weapon_kills[MOD_CHAINGUN];
+	combined_weapon_kills["BFG"] = weapon_kills[MOD_BFG] + weapon_kills[MOD_BFG_SPLASH];
+	combined_weapon_kills["Telefrag"] = weapon_kills[MOD_TELEFRAG];
+	combined_weapon_kills["Falling"] = weapon_kills[MOD_FALLING];
+
+	// Sort weapons by kill count (descending)
+	std::vector<std::pair<std::string, int>> sorted_weapons;
+	for (const auto& wk : combined_weapon_kills) {
+		if (wk.second > 0) {
+			sorted_weapons.push_back(wk);
+		}
+	}
+	std::stable_sort(sorted_weapons.begin(), sorted_weapons.end(), compareWeaponKillsDesc);
+
+	if (!sorted_weapons.empty()) {
+		game_tpl.ShowSection("HAS_WEAPON_KILLS");
+		for (const auto& wk : sorted_weapons) {
+			ctemplate::TemplateDictionary* sub_dict = game_tpl.AddSectionDictionary("WEAPON_KILLS");
+			sub_dict->SetValue("WEAPON_NAME", wk.first);
+			sub_dict->SetValue("KILL_COUNT", std::to_string(wk.second));
+		}
+	}
+
 	std::string output;
 	ctemplate::ExpandTemplate("templates/game.tpl", ctemplate::DO_NOT_STRIP, &game_tpl, &output);
 	std::ofstream myfile;
@@ -185,3 +228,17 @@ void getGameKillMatrix(cppdb::session& database, int gamenumber, std::map<std::p
 	}
 }
 
+void getGameWeaponKills(cppdb::session& database, int gamenumber, std::map<int, int>& weapon_kills) {
+	std::string sql = "SELECT modtype, COUNT(0) as count FROM oastat.oastat_kills "
+		"WHERE gamenumber = ? AND attacker <> target "
+		"GROUP BY modtype ORDER BY count DESC";
+	cppdb::statement st = database.prepare(sql);
+	st.bind(1, gamenumber);
+	cppdb::result res = st.query();
+	while(res.next()) {
+		int modtype;
+		int count;
+		res >> modtype >> count;
+		weapon_kills[modtype] = count;
+	}
+}

@@ -40,6 +40,7 @@ void getMapRecentGames(cppdb::session& database, const std::string& mapname, std
 
 // Game management
 void getRecentGames(cppdb::session& database, std::vector<OastatGame>& games);
+void getGameWeaponKills(cppdb::session& database, int gamenumber, std::map<int, int>& weapon_kills);
 void getGameScoreTotal(cppdb::session& database, int gamenumber, std::vector<std::pair<int,int>>& scores);
 void getGameScoreProgression(cppdb::session& database, int gamenumber, std::vector<ScorePoint>& progression);
 void getGameKillMatrix(cppdb::session& database, int gamenumber, std::map<std::pair<int,int>, int>& matrix, std::vector<int>& players);
