@@ -52,6 +52,7 @@ void write_html_map(cppdb::session& database, const std::string& mapname, const 
 
 // Utility functions
 std::string getWeaponName(int modtype);
+std::string getGametypeName(int gametype);
 std::string getTimeStamp(const tm& _datetime);
 
 // Global data accessors

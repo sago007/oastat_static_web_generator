@@ -133,6 +133,7 @@
 			<tr>
 				<th>Game</th>
 				<th>Map</th>
+				<th>Gametype</th>
 				<th>Played at</th>
 				<th>Server name</th>
 			</tr>
@@ -140,6 +141,7 @@
 			<tr>
 				<td><a href="game/{{GAMENUMBER}}.html">{{GAMENUMBER}}</a></td>
 				<td>{{MAPNAME}}</td>
+				<td>{{GAMETYPE}}</td>
 				<td>{{TIME}}</td>
 				<td>{{SERVERNAME}}</td>
 			</tr>

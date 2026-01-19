@@ -83,6 +83,7 @@ void write_html_index(cppdb::session& database, const std::string& output_dir) {
 		sub_dict->SetValue("EVEN_LINE", (i%2)?"1":"0");
 		sub_dict->SetValue("GAMENUMBER", std::to_string(game.gamenumber) );
 		sub_dict->SetValue("MAPNAME", game.mapname);
+		sub_dict->SetValue("GAMETYPE", getGametypeName(game.gametype));
 		sub_dict->SetValue("TIME", getTimeStamp(game.time));
 		sub_dict->SetValue("SERVERNAME", game.servername);
 	}

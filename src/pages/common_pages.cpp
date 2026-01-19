@@ -63,6 +63,26 @@ std::string getWeaponName(int modtype) {
 	}
 }
 
+std::string getGametypeName(int gametype) {
+	switch(gametype) {
+		case 0: return "FFA";
+		case 1: return "Tournament";
+		case 2: return "Single Player";
+		case 3: return "TDM";
+		case 4: return "CTF";
+		case 5: return "One Flag CTF";
+		case 6: return "Overload";
+		case 7: return "Harvester";
+		case 8: return "Elimination";
+		case 9: return "CTF Elimination";
+		case 10: return "LMS";
+		case 11: return "Double Domination";
+		case 12: return "Domination";
+		case 13: return "Possession";
+		default: return "Unknown";
+	}
+}
+
 // Player management functions
 OastatPlayer getPlayer(cppdb::session& database, int playerid) {
 	OastatPlayer ret;
