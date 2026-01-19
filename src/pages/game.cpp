@@ -31,6 +31,7 @@ void write_html_game(cppdb::session& database, const OastatGame& game, const std
 	game_tpl.SetValue("GENERATION_DATE", timestamp_now_as_string(database));
 	game_tpl.SetValue("GAME_NUMBER", std::to_string(game.gamenumber));
 	game_tpl.SetValue("GAME_MAP", game.mapname);
+	game_tpl.SetValue("GAME_GAMETYPE", getGametypeName(game.gametype));
 	game_tpl.SetValue("GAME_SERVERNAME", game.servername);
 
 	std::vector<std::pair<int,int>> scores;
