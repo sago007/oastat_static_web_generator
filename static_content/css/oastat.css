@@ -90,6 +90,31 @@ td {
 }
 /*table section end*/
 
+.site-nav {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #2c3e50;
+}
+
+.site-nav .brand {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #2c3e50;
+    text-decoration: none;
+}
+
+.site-nav .breadcrumb {
+    color: #666;
+    font-size: 0.95em;
+}
+
+.site-nav .breadcrumb a {
+    color: #2c3e50;
+}
+
 .update {
     font-size: 0.85em;
     color: #666;

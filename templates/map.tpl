@@ -37,6 +37,10 @@
 </head>
 <body>
 <div class="main-section">
+	<div class="site-nav">
+		<a class="brand" href="../index.html">OpenArena Stats</a>
+		<span class="breadcrumb"><a href="../index.html">Home</a> / Map: {{MAP_NAME}}</span>
+	</div>
 	<h1>Map: {{MAP_NAME}}</h1>
 
 	<div class="levelshot">

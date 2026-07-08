@@ -40,8 +40,12 @@
 </head>
 <body>
 <div class="main-section">
+	<div class="site-nav">
+		<a class="brand" href="../index.html">OpenArena Stats</a>
+		<span class="breadcrumb"><a href="../index.html">Home</a> / Game {{GAME_NUMBER}}</span>
+	</div>
 	<div class="intro">OpenArena Stats - Game {{GAME_NUMBER}}</div>
-	{{GAME_GAMETYPE}} on {{GAME_MAP}} at {{GAME_SERVERNAME}}
+	{{GAME_GAMETYPE}} on <a href="../map/{{GAME_MAP}}.html">{{GAME_MAP}}</a> at {{GAME_SERVERNAME}}
         <div class="levelshot">
             <img src="../static/images/oa640x400/{{GAME_MAP}}.jpg" alt="{{GAME_MAP}}">
         </div>

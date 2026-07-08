@@ -36,7 +36,10 @@
 
 	<body>
 		<div class="main-section">
-		<h1>OpenArena Stats</h1>
+		<div class="site-nav">
+			<a class="brand" href="index.html">OpenArena Stats</a>
+			<span class="breadcrumb">Home</span>
+		</div>
 
 		<div style="margin: 15px 0; padding: 10px; background-color: #f0f0f0; border-radius: 5px;">
 			<label style="cursor: pointer; display: inline-flex; align-items: center;">
