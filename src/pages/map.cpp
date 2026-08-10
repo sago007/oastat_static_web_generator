@@ -65,6 +65,8 @@ void write_html_map(cppdb::session& database, const std::string& mapname, const 
 		sub_dict->SetValue("GAMENUMBER", std::to_string(game.gamenumber));
 		sub_dict->SetValue("TIME", getTimeStamp(game.time));
 		sub_dict->SetValue("SERVERNAME", game.servername);
+		// Ensure every game linked from this map page actually gets a game page generated
+		write_html_game(database, game, output_dir);
 	}
 
 	std::string output;
